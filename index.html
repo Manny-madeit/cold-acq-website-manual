@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cold ACQuisition — Done-for-you cold outbound that books B2B meetings</title>
+  <meta name="description" content="We manage every part of the cold outbound system — infrastructure, TAM mapping, enrichment, positioning, and copywriting. We chase, you close. Only pay for meetings held." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#070809',
+            ink: '#0A1A20',
+            ice: '#F0F9FF',
+            cyan: { DEFAULT: '#22D3EE', dark: '#06B6D4' },
+            card: '#0E1116',
+            line: '#24262B',
+            muted: '#9CA0A6',
+            success: { DEFAULT: '#22D3EE', bg: '#08232B' },
+            warning: { DEFAULT: '#2A93A6', bg: '#0B2A33' },
+          },
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            body: ['"DM Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          borderRadius: { sm: '6px', md: '10px', lg: '16px', pill: '999px' },
+          maxWidth: { shell: '1200px' },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --navy: #070809;
+      --ice: #F0F9FF;
+      --cyan: #22D3EE;
+      --cyan-dark: #06B6D4;
+      --card: #0E1116;
+      --line: #24262B;
+      --muted: #9CA0A6;
+      --success: #22D3EE;
+    }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+    section[id], [id].anchor-offset { scroll-margin-top: 96px; }
+    body {
+      background: var(--navy);
+      color: var(--ice);
+      font-family: 'DM Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+    ::selection { background: rgba(34, 211, 238, 0.22); color: #F0F9FF; }
+
+    /* Operator-grade structural grid — faint, fixed, behind content. */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(30, 48, 64, 0.16) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(30, 48, 64, 0.16) 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(ellipse 95% 55% at 50% 0%, #000 35%, transparent 80%);
+      mask-image: radial-gradient(ellipse 95% 55% at 50% 0%, #000 35%, transparent 80%);
+    }
+
+    :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 4px; }
+    a, button { outline: none; }
+
+    .h-display { font-family: 'Syne', sans-serif; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+    .h2-display { font-family: 'Syne', sans-serif; font-weight: 600; letter-spacing: -0.02em; line-height: 1.12; }
+    .label-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Buttons */
+    .btn { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--cyan); color: #07151A; padding: 12px 22px; border-radius: 6px; border: 1px solid var(--cyan); }
+    .btn-primary:hover { background: var(--cyan-dark); border-color: var(--cyan-dark); }
+    .btn-ghost { background: transparent; color: var(--cyan); padding: 12px 22px; border-radius: 6px; border: 1px solid rgba(34, 211, 238, 0.45); }
+    .btn-ghost:hover { background: rgba(34, 211, 238, 0.08); border-color: var(--cyan); }
+
+    .nav-link { position: relative; color: var(--muted); font-size: 14px; font-weight: 500; transition: color .18s ease; }
+    .nav-link:hover { color: var(--ice); }
+    .nav-link::after { content: ''; position: absolute; left: 0; bottom: -6px; height: 1px; width: 0; background: var(--cyan); transition: width .22s ease; }
+    .nav-link:hover::after { width: 100%; }
+
+    .accent-bar { display: none; }
+
+    /* Reveal animation (transform + opacity only, ease-out, no bounce) */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    [data-reveal] { opacity: 0; }
+    [data-reveal].in { animation: fadeUp .6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards; animation-delay: var(--d, 0s); }
+
+    /* Rotating word */
+    .rotator { display: inline-block; color: var(--cyan); transition: opacity .28s ease, transform .28s ease; will-change: opacity, transform; }
+    .rotator.swap { opacity: 0; transform: translateY(-8px); }
+
+    /* Booking dot pulse */
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .dot-pulse { animation: pulse 2.2s ease-in-out infinite; }
+
+    /* Video placeholder */
+    .video-ph { position: relative; }
+    .play-btn { transition: transform .2s ease, background .2s ease; }
+    .video-ph:hover .play-btn { transform: scale(1.06); }
+
+    /* Mobile menu */
+    .mobile-menu { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+    .mobile-menu.open { max-height: 420px; }
+
+    /* Accordion */
+    .acc-body { transition: max-height .35s ease; }
+    .acc-icon { transition: transform .3s ease; }
+
+    /* Calculator slider */
+    .calc-range { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 999px; background: var(--line); outline: none; }
+    .calc-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; height: 18px; width: 18px; border-radius: 999px; background: var(--cyan); cursor: pointer; border: 3px solid var(--navy); }
+    .calc-range::-moz-range-thumb { height: 18px; width: 18px; border-radius: 999px; background: var(--cyan); cursor: pointer; border: 3px solid var(--navy); }
+    .calc-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(34,211,238,.3); }
+    input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    /* Calculator ramp chart */
+    .calc-chart-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+    .calc-chart-line.draw { animation: calcDraw 1.5s cubic-bezier(0.22,0.61,0.36,1) forwards; }
+    @keyframes calcDraw { to { stroke-dashoffset: 0; } }
+    .calc-chart-area { opacity: 0; }
+    .calc-chart-area.draw { animation: calcFade 1.2s ease-out .25s forwards; }
+    @keyframes calcFade { to { opacity: 1; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+      [data-reveal] { opacity: 1 !important; }
+    }
+  </style>
+</head>
+
+<body class="font-body antialiased">
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="fixed top-0 inset-x-0 z-50 px-4 pt-4">
+    <nav class="mx-auto max-w-shell">
+      <div class="flex items-center justify-between gap-4 rounded-pill border border-line/80 bg-navy/70 backdrop-blur-xl px-4 py-3 md:px-5">
+        <a href="#top" class="shrink-0 font-display text-[19px] font-bold tracking-tight text-ice" aria-label="Cold ACQuisition home">
+          Cold <span class="text-cyan">ACQ</span>uisition
+        </a>
+
+        <div class="hidden lg:flex items-center gap-8">
+          <a href="#process" class="nav-link">Process</a>
+          <a href="#service" class="nav-link">Service</a>
+          <a href="#results" class="nav-link">Results</a>
+          <a href="#pricing" class="nav-link">Pricing</a>
+          <a href="#about" class="nav-link">About</a>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <a href="#book" class="btn btn-primary hidden sm:inline-flex">Book a call</a>
+          <button id="menuBtn" class="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-md border border-line text-ice" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+            <svg id="menuIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="mobileMenu" class="mobile-menu lg:hidden mt-2 rounded-lg border border-line bg-card/95 backdrop-blur-xl">
+        <div class="flex flex-col p-2">
+          <a href="#process" class="px-4 py-3 rounded-md text-muted hover:text-ice hover:bg-navy/60 transition">Process</a>
+          <a href="#service" class="px-4 py-3 rounded-md text-muted hover:text-ice hover:bg-navy/60 transition">Service</a>
+          <a href="#results" class="px-4 py-3 rounded-md text-muted hover:text-ice hover:bg-navy/60 transition">Results</a>
+          <a href="#pricing" class="px-4 py-3 rounded-md text-muted hover:text-ice hover:bg-navy/60 transition">Pricing</a>
+          <a href="#about" class="px-4 py-3 rounded-md text-muted hover:text-ice hover:bg-navy/60 transition">About</a>
+          <a href="#book" class="btn btn-primary justify-center mt-2 mx-2 mb-2">Book a call</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top" class="relative z-10">
+    <!-- ===================== BLOCK 1 (compact intro) ===================== -->
+    <section class="mx-auto max-w-shell px-5 pt-32 pb-6 md:pt-36 md:pb-8 text-center">
+      <div data-reveal style="--d:0s" class="inline-flex items-center gap-2.5 rounded-pill border border-line bg-card/60 px-3.5 py-1.5">
+        <span class="dot-pulse h-2 w-2 rounded-full bg-success"></span>
+        <span class="font-mono text-[12px] tracking-wide text-ice/80">Now booking</span>
+        <span class="text-muted">·</span>
+        <span class="font-mono text-[12px] tracking-wide text-muted">2 slots open this <span id="bookingMonth">month</span></span>
+      </div>
+
+      <h1 data-reveal style="--d:.08s" class="h-display mx-auto mt-5 text-ice">
+        <span class="block whitespace-nowrap" style="font-size:clamp(11px,3.3vw,30px);">
+          B2B companies with a TAM of <span class="text-cyan">30k+</span> contacts.
+        </span>
+        <span class="block text-muted font-semibold mt-3 text-[17px] sm:text-[19px]">
+          No matter the industry&nbsp;—
+          <span id="industryRotator" class="rotator sm:min-w-[10.5em] sm:text-left">Logistics</span>
+        </span>
+      </h1>
+    </section>
+
+    <!-- ===================== BLOCK 2 (main centerpiece) ===================== -->
+    <section class="mx-auto max-w-shell px-5 pb-20 pt-6 md:pb-28 md:pt-8">
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+        <!-- Left: text -->
+        <div>
+          <div data-reveal style="--d:0s" class="accent-bar mb-5"></div>
+          <h2 data-reveal style="--d:.06s" class="h2-display text-[24px] sm:text-[28px] md:text-[31px] text-ice">
+            We'll get you <span class="text-cyan">20–30 calls</span> in the next 90 days with prospects looking for your service.
+          </h2>
+
+          <p data-reveal style="--d:.14s" class="h2-display mt-4 text-[30px] sm:text-[36px] md:text-[40px] text-cyan">
+            Only pay for meetings held.
+          </p>
+
+          <p data-reveal style="--d:.2s" class="mt-3 text-[17px] sm:text-[19px]">
+            <span id="valueRotator" class="rotator font-semibold" style="color:#64748B;">Completely done for you</span>
+          </p>
+
+          <div data-reveal style="--d:.28s" class="mt-8">
+            <a href="#book" class="btn btn-primary !py-2.5 !pl-2.5 !pr-5 rounded-pill">
+              <span class="h-10 w-10 rounded-full bg-no-repeat ring-1 ring-black/20 shrink-0" style="background-image:url('assets/manny.png');background-size:175%;background-position:50% 22%" role="img" aria-label="Manny"></span>
+              Book a free consultation with Manny
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right: video placeholder + caption -->
+        <div data-reveal style="--d:.16s">
+          <div class="video-ph rounded-lg border border-line bg-card overflow-hidden">
+            <div class="aspect-video flex flex-col items-center justify-center relative">
+              <span class="absolute top-3 left-4 label-mono">Intro · Manny</span>
+              <span class="absolute top-3 right-4 font-mono text-[10px] tracking-wide text-muted/70">REPLACE WITH WISTIA EMBED</span>
+
+              <button class="play-btn h-16 w-16 rounded-full bg-cyan text-[#07151A] grid place-items-center" aria-label="Play video (coming soon)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+              <span class="mt-4 font-mono text-[11px] tracking-widest uppercase text-muted">Video coming soon</span>
+            </div>
+          </div>
+
+          <p data-reveal style="--d:.24s" class="mt-5 text-[15px] leading-[1.7] text-ice/70">
+            We manage every part of the system — from email infrastructure setup and TAM mapping to data
+            enrichment, positioning, and copywriting. <span class="text-ice">We chase, you close.</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 3 (proof / stats band) ===================== -->
+    <section class="relative border-y border-line bg-[#0B0D10]">
+      <div class="mx-auto max-w-shell px-5 py-20 md:py-28 text-center">
+        <div data-reveal class="accent-bar mx-auto mb-7"></div>
+
+        <h2 data-reveal style="--d:.06s" class="h-display text-ice text-[32px] sm:text-[44px] md:text-[52px] leading-[1.08]">
+          Pipeline is oxygen.<br />
+          We make sure you never run out.
+        </h2>
+
+        <div class="mt-14 grid grid-cols-2 md:grid-cols-4">
+          <div data-reveal style="--d:.1s" class="md:border-r border-line px-4 py-3">
+            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">250k+</div>
+            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">emails sent</div>
+          </div>
+          <div data-reveal style="--d:.18s" class="md:border-r border-line px-4 py-3">
+            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">$250k+</div>
+            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">in lifetime revenue</div>
+          </div>
+          <div data-reveal style="--d:.26s" class="md:border-r border-line px-4 py-3">
+            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">$1M+</div>
+            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">in pipeline revenue</div>
+          </div>
+          <div data-reveal style="--d:.34s" class="px-4 py-3">
+            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">$1</div>
+            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">LTV per email sent</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 4 (Our Service) ===================== -->
+    <section id="service" class="mx-auto max-w-shell px-5 py-20 md:py-28">
+      <div class="max-w-2xl">
+        <div data-reveal class="accent-bar mb-5"></div>
+        <span data-reveal style="--d:.04s" class="label-mono">Our service</span>
+        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">
+          Gain the output of <span class="text-cyan">10 SDRs</span>, for the price of 1.
+        </h2>
+        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">
+          No need to scale by hiring expensive, inexperienced SDRs. Cold ACQuisition handles everything for you, at unlimited scale.
+        </p>
+      </div>
+
+      <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- card 1 -->
+        <article data-reveal style="--d:.06s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
+          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="0.7" fill="currentColor" stroke="none"/><circle cx="7" cy="17" r="0.7" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">Infrastructure Setup &amp; Warm-Up</h3>
+          <p class="mt-2 text-[14px] leading-[1.7] text-muted">Receive 25+ domains and 50+ mailboxes built by our team from scratch for you. No more third-party providers, weak warm-up pools, or bad deliverability.</p>
+          <a href="#book" class="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">Land in the primary inbox <svg class="transition-transform duration-200 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <!-- card 2 -->
+        <article data-reveal style="--d:.12s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
+          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">TAM Mapping, ICP Research &amp; Targeting</h3>
+          <p class="mt-2 text-[14px] leading-[1.7] text-muted">Access your true TAM — data enriched with 10+ providers, triple-verified contacts, and sub-1% bounce rates, resulting in 3× more coverage, pipeline, and revenue.</p>
+          <a href="#book" class="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">Triple-verified data <svg class="transition-transform duration-200 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <!-- card 3 -->
+        <article data-reveal style="--d:.18s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
+          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 16a8 8 0 0 1 8-8"/><path d="M7.5 16a4.5 4.5 0 0 1 4.5-4.5"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">AI-Intent Scraping &amp; Signal Tracking</h3>
+          <p class="mt-2 text-[14px] leading-[1.7] text-muted">Job changes, funding rounds, and key buying signals tracked in real time, so outreach lands the moment prospects are most likely to engage.</p>
+          <a href="#book" class="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">Reach buyers in-market <svg class="transition-transform duration-200 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <!-- card 4 -->
+        <article data-reveal style="--d:.06s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
+          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+          <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">Sales Assets &amp; Copywriting</h3>
+          <p class="mt-2 text-[14px] leading-[1.7] text-muted">Messaging from experts using proven tactics that have generated 7 figures in pipeline revenue — tailored to your ICP and designed to drive real interest.</p>
+          <a href="#book" class="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">Messaging that converts <svg class="transition-transform duration-200 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <!-- card 5 -->
+        <article data-reveal style="--d:.12s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
+          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/></svg>
+          </div>
+          <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">Personalized Video Campaigns</h3>
+          <p class="mt-2 text-[14px] leading-[1.7] text-muted">Send tailored video messages at scale to stand out in crowded inboxes, boost engagement, and create more meaningful connections with your ICP.</p>
+          <a href="#book" class="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">Stand out in the inbox <svg class="transition-transform duration-200 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <!-- card 6 -->
+        <article data-reveal style="--d:.18s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
+          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r="2.2" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">Campaign Optimization &amp; Management</h3>
+          <p class="mt-2 text-[14px] leading-[1.7] text-muted">We run it end-to-end — continuous campaign optimization, full inbox management, pre-call reminders, and lead nurturing — then book meetings straight to your calendar.</p>
+          <a href="#book" class="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan">We handle everything <svg class="transition-transform duration-200 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+      </div>
+
+      <!-- Everything included -->
+      <div data-reveal class="mt-10">
+        <div class="label-mono mb-4">Also included, end-to-end</div>
+        <div class="flex flex-wrap gap-2.5">
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Campaign optimization</span>
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Inbox management</span>
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Pre-call reminders</span>
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Lead nurturing before your call</span>
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Meetings booked on your calendar</span>
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Lead hand-off</span>
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Weekly video reports</span>
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Real-time Slack access to leads</span>
+          <span class="inline-flex items-center gap-2 rounded-pill border border-line bg-card px-3.5 py-1.5 text-[13px] text-ice/80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Bi-weekly calls</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 5 (Roadmap) ===================== -->
+    <section id="process" class="border-y border-line bg-[#0B0D10]">
+      <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
+        <div class="max-w-2xl">
+          <div data-reveal class="accent-bar mb-5"></div>
+          <span data-reveal style="--d:.04s" class="label-mono">Roadmap</span>
+          <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">
+            From zero to pipeline in <span class="text-cyan">90 days</span>.
+          </h2>
+          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">
+            How we go from kickoff to a live outbound system generating meetings with your ideal prospects.
+          </p>
+        </div>
+
+        <div class="mt-12 border-t border-line">
+          <div data-reveal class="grid md:grid-cols-[230px_1fr] gap-3 md:gap-10 py-8 border-b border-line">
+            <div class="flex items-center gap-4">
+              <span class="font-mono text-[30px] font-semibold text-cyan/25 leading-none">01</span>
+              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-cyan">Week 1–2</span>
+            </div>
+            <div>
+              <h3 class="font-display text-[22px] font-semibold text-ice">The Foundation</h3>
+              <p class="mt-3 max-w-2xl text-[15px] leading-[1.7] text-muted">We build the sending infrastructure from scratch: hundreds of email accounts across purpose-built domains, allocated across dedicated IPs and warmed before a single message goes out. In parallel, we work through your ICP with you, define the segments worth testing, and write differentiated messaging for each one. By the end of week two, the system is live.</p>
+            </div>
+          </div>
+          <div data-reveal class="grid md:grid-cols-[230px_1fr] gap-3 md:gap-10 py-8 border-b border-line">
+            <div class="flex items-center gap-4">
+              <span class="font-mono text-[30px] font-semibold text-cyan/25 leading-none">02</span>
+              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-cyan">Week 3–4</span>
+            </div>
+            <div>
+              <h3 class="font-display text-[22px] font-semibold text-ice">Launch &amp; Grow</h3>
+              <p class="mt-3 max-w-2xl text-[15px] leading-[1.7] text-muted">Initial outreach launches and meetings with ideal prospects often start booking immediately. Early performance data and engagement insights lay the groundwork for optimization and scale.</p>
+            </div>
+          </div>
+          <div data-reveal class="grid md:grid-cols-[230px_1fr] gap-3 md:gap-10 py-8 border-b border-line">
+            <div class="flex items-center gap-4">
+              <span class="font-mono text-[30px] font-semibold text-cyan/25 leading-none">03</span>
+              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-cyan">Month 2</span>
+            </div>
+            <div>
+              <h3 class="font-display text-[22px] font-semibold text-ice">Optimize &amp; Scale</h3>
+              <p class="mt-3 max-w-2xl text-[15px] leading-[1.7] text-muted">With real response data in hand, we double down on high-performing sequences, refine messaging based on prospect engagement, and scale winning campaigns to new segments and larger lists.</p>
+            </div>
+          </div>
+          <div data-reveal class="grid md:grid-cols-[230px_1fr] gap-3 md:gap-10 py-8 border-b border-line">
+            <div class="flex items-center gap-4">
+              <span class="font-mono text-[30px] font-semibold text-cyan/25 leading-none">04</span>
+              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-cyan">Month 3</span>
+            </div>
+            <div>
+              <h3 class="font-display text-[22px] font-semibold text-ice">Systematize &amp; Expand</h3>
+              <p class="mt-3 max-w-2xl text-[15px] leading-[1.7] text-muted">The system matures into a predictable pipeline generator. We document the playbooks, expand to additional prospect segments, and hand over a process your team can run and own independently going forward.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 6 (What we replace) ===================== -->
+    <section id="replace" class="mx-auto max-w-shell px-5 py-20 md:py-28">
+      <div class="max-w-2xl">
+        <div data-reveal class="accent-bar mb-5"></div>
+        <span data-reveal style="--d:.04s" class="label-mono">What we replace</span>
+        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">
+          The infrastructure is included.
+        </h2>
+        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">
+          Building this in-house means managing a stack of 10+ tools, a team to run them, and months of ramp before you see results. We handle all of it — and deliver the value of 10 SDRs for the price of 1.
+        </p>
+      </div>
+
+      <div class="mt-12 grid lg:grid-cols-2 gap-6 items-start">
+        <!-- People -->
+        <div data-reveal class="rounded-lg border border-line bg-card p-6 md:p-8">
+          <div class="label-mono mb-6">The people you would need</div>
+          <div class="flex items-start justify-between gap-4 py-4 border-b border-line">
+            <div>
+              <div class="text-[15px] font-medium text-ice">GTM lead / founding operator</div>
+              <div class="mt-1 text-[13px] leading-relaxed text-muted max-w-xs">Strategic depth to define ICP, size markets, and identify signal. Often already stretched thin.</div>
+            </div>
+            <div class="font-mono text-[12px] text-muted text-right whitespace-nowrap">Depends on<br />allocation</div>
+          </div>
+          <div class="flex items-start justify-between gap-4 py-4 border-b border-line">
+            <div>
+              <div class="text-[15px] font-medium text-ice">SDR to execute</div>
+              <div class="mt-1 text-[13px] leading-relaxed text-muted max-w-xs">US vs offshore, before management overhead and ramp time.</div>
+            </div>
+            <div class="font-mono text-[14px] text-ice whitespace-nowrap">$2,000–8,000<span class="text-muted">/mo</span></div>
+          </div>
+          <div class="flex items-center justify-between gap-4 pt-5">
+            <div class="label-mono">Labor alone</div>
+            <div class="font-mono text-[16px] font-semibold text-warning whitespace-nowrap">~$2,000–10,000+/mo</div>
+          </div>
+        </div>
+
+        <!-- Tools -->
+        <div data-reveal style="--d:.08s" class="rounded-lg border border-line bg-card p-6 md:p-8">
+          <div class="label-mono mb-5">The tools you would need</div>
+          <div class="grid sm:grid-cols-2 gap-x-8">
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">100+ Google Business</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$700+/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">Email Bison</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$599/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">Apollo</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$500–600/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">Clay</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$446/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">AI enrichment (Anthropic + OpenAI)</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$200+/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">Domains</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$166+/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">LinkedIn Sales Navigator</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$120/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">AI Ark / ListKit</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$100+/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">Bounce Ban</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$85+/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px]"><span class="text-ice/90">Apify</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$29+/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px] sm:border-b-0"><span class="text-ice/90">Local directory scraper</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$24/mo</span></div>
+            <div class="flex items-center justify-between gap-3 py-2.5 border-b border-line/60 text-[14px] sm:border-b-0"><span class="text-ice/90">N8N</span><span class="font-mono text-[13px] text-muted whitespace-nowrap">$24/mo</span></div>
+          </div>
+          <div class="flex items-center justify-between gap-4 pt-5 mt-3 border-t border-line">
+            <div class="label-mono">Tools alone</div>
+            <div class="font-mono text-[16px] font-semibold text-warning whitespace-nowrap">~$3,000+/mo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total to build in-house -->
+      <div data-reveal class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border border-warning/30 bg-warning-bg/40 px-6 py-5">
+        <div>
+          <div class="font-mono text-[11px] uppercase tracking-[0.16em] text-warning">Total to build in-house</div>
+          <div class="mt-1 text-[14px] text-muted">Minimum viable setup through a properly staffed operation</div>
+        </div>
+        <div class="font-mono text-[24px] sm:text-[28px] font-semibold text-warning whitespace-nowrap">~$6,000–18,000+<span class="text-[16px] text-muted">/mo</span></div>
+      </div>
+
+      <!-- Under this -->
+      <div data-reveal style="--d:.06s" class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 rounded-lg border border-cyan/30 bg-cyan/[0.04] px-6 py-6">
+        <div>
+          <div class="font-display text-[20px] sm:text-[23px] font-semibold text-ice">Our programs start at <span class="text-cyan">$1,750</span> for 45 days.</div>
+          <div class="mt-1.5 inline-flex items-center gap-2 text-[14px] text-muted"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Everything above is included.</div>
+        </div>
+        <a href="#book" class="btn btn-primary rounded-pill shrink-0">Book a call with Manny</a>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 7 (Selected results) ===================== -->
+    <section id="results" class="border-y border-line bg-[#0B0D10]">
+      <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
+        <div class="max-w-2xl">
+          <div data-reveal class="accent-bar mb-5"></div>
+          <span data-reveal style="--d:.04s" class="label-mono">Results</span>
+          <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">Selected results.</h2>
+          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Real outcomes from campaigns we've architected and run end-to-end. Select one to expand.</p>
+        </div>
+
+        <div id="resultsAccordion" data-reveal class="mt-10 border-t border-line">
+          <!-- 01 -->
+          <div class="acc-item border-b border-line">
+            <button class="acc-trigger w-full flex items-center gap-5 py-6 text-left" aria-expanded="false">
+              <span class="font-mono text-[15px] text-cyan/40 w-8 shrink-0">01</span>
+              <span class="flex-1 min-w-0">
+                <span class="block font-mono text-[11px] uppercase tracking-[0.16em] text-cyan">Amazon PPC Agency</span>
+                <span class="block font-display text-[20px] sm:text-[24px] font-semibold text-ice mt-1.5">Calls with 7 &amp; 8-figure DTC brands</span>
+              </span>
+              <span class="acc-icon shrink-0 text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+            </button>
+            <div class="acc-body overflow-hidden" style="max-height:0">
+              <div class="pb-7 pl-[52px] max-w-2xl text-[15px] leading-[1.7] text-muted">An Amazon PPC agency landed calls with large-scale ecommerce brands — putting their team in front of 7 &amp; 8-figure DTC operators they'd struggled to reach.</div>
+            </div>
+          </div>
+          <!-- 02 -->
+          <div class="acc-item border-b border-line">
+            <button class="acc-trigger w-full flex items-center gap-5 py-6 text-left" aria-expanded="false">
+              <span class="font-mono text-[15px] text-cyan/40 w-8 shrink-0">02</span>
+              <span class="flex-1 min-w-0">
+                <span class="block font-mono text-[11px] uppercase tracking-[0.16em] text-cyan">Creative / Design Agency</span>
+                <span class="block font-display text-[20px] sm:text-[24px] font-semibold text-ice mt-1.5">30 calls in 50 days</span>
+              </span>
+              <span class="acc-icon shrink-0 text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+            </button>
+            <div class="acc-body overflow-hidden" style="max-height:0">
+              <div class="pb-7 pl-[52px] max-w-2xl">
+                <p class="text-[15px] leading-[1.7] text-muted">A creative agency booked 30 calls with VC funds &amp; VC-backed startups in under two months.</p>
+                <div class="mt-4 flex flex-wrap gap-x-8 gap-y-3">
+                  <div><span class="font-mono text-[20px] font-semibold text-cyan">30</span> <span class="text-[13px] text-muted">calls booked</span></div>
+                  <div><span class="font-mono text-[20px] font-semibold text-cyan">50</span> <span class="text-[13px] text-muted">days</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 03 -->
+          <div class="acc-item border-b border-line">
+            <button class="acc-trigger w-full flex items-center gap-5 py-6 text-left" aria-expanded="false">
+              <span class="font-mono text-[15px] text-cyan/40 w-8 shrink-0">03</span>
+              <span class="flex-1 min-w-0">
+                <span class="block font-mono text-[11px] uppercase tracking-[0.16em] text-cyan">B2B Lead-Gen Agency</span>
+                <span class="block font-display text-[20px] sm:text-[24px] font-semibold text-ice mt-1.5">40+ meetings with 3PL founders</span>
+              </span>
+              <span class="acc-icon shrink-0 text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+            </button>
+            <div class="acc-body overflow-hidden" style="max-height:0">
+              <div class="pb-7 pl-[52px] max-w-2xl">
+                <p class="text-[15px] leading-[1.7] text-muted">Booked 40+ meetings with 3PL founders across three outbound sequences.</p>
+                <div class="mt-4 flex flex-wrap gap-x-8 gap-y-3">
+                  <div><span class="font-mono text-[20px] font-semibold text-cyan">3,668</span> <span class="text-[13px] text-muted">leads</span></div>
+                  <div><span class="font-mono text-[20px] font-semibold text-cyan">7,208</span> <span class="text-[13px] text-muted">emails</span></div>
+                  <div><span class="font-mono text-[20px] font-semibold text-cyan">33</span> <span class="text-[13px] text-muted">positive replies</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 04 -->
+          <div class="acc-item border-b border-line">
+            <button class="acc-trigger w-full flex items-center gap-5 py-6 text-left" aria-expanded="false">
+              <span class="font-mono text-[15px] text-cyan/40 w-8 shrink-0">04</span>
+              <span class="flex-1 min-w-0">
+                <span class="block font-mono text-[11px] uppercase tracking-[0.16em] text-cyan">3rd-Party Logistics</span>
+                <span class="block font-display text-[20px] sm:text-[24px] font-semibold text-ice mt-1.5">$100k+ in pipeline revenue</span>
+              </span>
+              <span class="acc-icon shrink-0 text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+            </button>
+            <div class="acc-body overflow-hidden" style="max-height:0">
+              <div class="pb-7 pl-[52px] max-w-2xl text-[15px] leading-[1.7] text-muted">Booked meetings with ecommerce brands doing 4,000+ orders/month, generating $100k+ in pipeline revenue.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 8 (Testimonials) ===================== -->
+    <section id="testimonials" class="mx-auto max-w-shell px-5 py-20 md:py-28">
+      <div class="max-w-2xl">
+        <div data-reveal class="accent-bar mb-5"></div>
+        <span data-reveal style="--d:.04s" class="label-mono">Testimonials</span>
+        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">What clients have to say.</h2>
+        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">After I booked him 3 calls in a single day, he sent this:</p>
+      </div>
+
+      <div class="mt-10 grid lg:grid-cols-2 gap-6 items-stretch">
+        <!-- Quote + voice note -->
+        <div data-reveal class="rounded-lg border border-line bg-card p-6 md:p-8 flex flex-col min-w-0">
+          <svg class="text-cyan/30" width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.5 7C6.46 7 4 9.46 4 12.5V19h6.5v-6.5H7.5c0-1.66 1.34-3 3-3V7Zm9.5 0c-3.04 0-5.5 2.46-5.5 5.5V19H20v-6.5h-3c0-1.66 1.34-3 3-3V7Z"/></svg>
+          <blockquote class="mt-4 font-display text-[20px] sm:text-[22px] leading-[1.5] tracking-[-0.01em] text-ice">
+            "Manny worked really hard to convert interested responses into scheduled calls. We were getting responses but struggling to convert — now that he's taken over, our conversion rate has gone up."
+          </blockquote>
+
+          <div class="mt-7 rounded-md border border-line bg-navy p-4">
+            <div class="flex items-center gap-2 label-mono mb-3"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/></svg> Hear it from him</div>
+            <div class="flex items-center gap-4">
+              <button id="vnPlay" class="play-btn h-11 w-11 rounded-full bg-cyan text-[#07151A] grid place-items-center shrink-0" aria-label="Play voice note"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+              <div id="waveform" class="flex-1 min-w-0 overflow-hidden flex items-center gap-[3px] h-9 cursor-pointer"></div>
+              <span id="vnTime" class="font-mono text-[12px] text-muted shrink-0 w-9 text-right">0:00</span>
+            </div>
+            <audio id="vnAudio" preload="metadata">
+              <source src="assets/isaac-voice-note.mp3" type="audio/mpeg" />
+              <source src="assets/isaac-voice-note.ogg" type="audio/ogg" />
+            </audio>
+          </div>
+
+          <div class="mt-auto pt-6 flex items-center gap-3">
+            <span class="h-14 w-14 rounded-full bg-no-repeat border border-line shrink-0" style="background-image:url('assets/isaac.jpg');background-size:130%;background-position:50% 20%" role="img" aria-label="Isaac Gross"></span>
+            <div>
+              <div class="text-[14px] text-ice font-medium">Isaac Gross</div>
+              <div class="text-[12px] text-muted">Amazon PPC Agency</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booked in a single day -->
+        <div data-reveal style="--d:.08s" class="rounded-lg border border-line bg-card p-6 md:p-8 flex flex-col min-w-0">
+          <div class="flex items-center justify-between">
+            <div class="label-mono">Booked in a single day</div>
+            <span class="inline-flex items-center gap-1.5 rounded-sm bg-success-bg px-2 py-1 font-mono text-[10px] font-medium tracking-wide text-success"><span class="h-1.5 w-1.5 rounded-full bg-success"></span>WED 18</span>
+          </div>
+          <div class="mt-5 flex items-baseline gap-2.5">
+            <span class="font-display text-[46px] font-bold text-cyan leading-none">3</span>
+            <span class="text-[15px] text-muted leading-tight">calls booked<br />for one client</span>
+          </div>
+
+          <div class="mt-6 space-y-2.5">
+            <div class="flex items-center gap-4 rounded-md border border-line bg-navy px-4 py-3">
+              <span class="font-mono text-[12px] text-cyan w-[58px] shrink-0">11:00 AM</span>
+              <div class="min-w-0">
+                <div class="text-[14px] text-ice font-medium truncate">Punit</div>
+                <div class="text-[12px] text-muted truncate">Growth Marketing Manager · America &amp; Beyond</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 rounded-md border border-line bg-navy px-4 py-3">
+              <span class="font-mono text-[12px] text-cyan w-[58px] shrink-0">11:30 AM</span>
+              <div class="min-w-0">
+                <div class="text-[14px] text-ice font-medium truncate">Guerry</div>
+                <div class="text-[12px] text-muted truncate">CEO · 3rd Rock Essentials</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 rounded-md border border-line bg-navy px-4 py-3">
+              <span class="font-mono text-[12px] text-cyan w-[58px] shrink-0">12:30 PM</span>
+              <div class="min-w-0">
+                <div class="text-[14px] text-ice font-medium truncate">Jon</div>
+                <div class="text-[12px] text-muted truncate">CEO · Composabl</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-auto pt-6 flex items-center gap-2 text-[13px] text-muted">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Booked straight onto the client's calendar.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 9 (Pipeline forecast) ===================== -->
+    <section id="forecast" class="border-y border-line bg-[#0B0D10]">
+      <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
+        <div class="max-w-2xl">
+          <div data-reveal class="accent-bar mb-5"></div>
+          <span data-reveal style="--d:.04s" class="label-mono">Pipeline forecast</span>
+          <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">What 90 days of outbound looks like.</h2>
+          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Adjust your deal size and scenario to model your pipeline with the Cold ACQuisition system.</p>
+        </div>
+
+        <div data-reveal class="mt-10 rounded-lg border border-line bg-card p-6 md:p-8">
+          <!-- Controls -->
+          <div class="grid sm:grid-cols-3 gap-4">
+            <label class="block">
+              <span class="text-[13px] text-muted">Average order value</span>
+              <div class="mt-2 flex items-center rounded-md border border-line bg-navy focus-within:border-cyan/50 transition-colors">
+                <span class="pl-3 pr-1 text-muted font-mono">$</span>
+                <input id="calcAOV" type="number" min="0" value="1000" class="w-full bg-transparent py-2.5 pr-3 font-mono text-ice outline-none" />
+              </div>
+            </label>
+            <label class="block">
+              <span class="text-[13px] text-muted">Client retention</span>
+              <div class="mt-2 flex items-center rounded-md border border-line bg-navy focus-within:border-cyan/50 transition-colors">
+                <input id="calcRetention" type="number" min="1" value="12" class="w-full bg-transparent py-2.5 px-3 font-mono text-ice outline-none" />
+                <span class="pr-3 text-muted text-[13px]">months</span>
+              </div>
+            </label>
+            <label class="block">
+              <span class="text-[13px] text-muted">Customer LTV <span class="text-muted/60">· auto-linked</span></span>
+              <div class="mt-2 flex items-center rounded-md border border-line bg-navy focus-within:border-cyan/50 transition-colors">
+                <span class="pl-3 pr-1 text-muted font-mono">$</span>
+                <input id="calcLTV" type="number" min="0" value="12000" class="w-full bg-transparent py-2.5 pr-3 font-mono text-ice outline-none" />
+              </div>
+            </label>
+          </div>
+          <div class="mt-4 grid sm:grid-cols-2 gap-4 sm:gap-8 items-end">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-muted">Close rate on cold traffic</span>
+                <span id="calcCloseVal" class="font-mono text-cyan text-[14px]">10%</span>
+              </div>
+              <input id="calcClose" type="range" min="10" max="25" value="10" step="1" class="calc-range mt-3 w-full" />
+              <div class="flex justify-between font-mono text-[12px] text-muted mt-1"><span>10%</span><span>25%</span></div>
+            </div>
+            <div>
+              <span class="text-[13px] text-muted">Scenario</span>
+              <div id="calcScenario" class="mt-2 grid grid-cols-3 gap-1 rounded-md border border-line bg-navy p-1">
+                <button data-scn="low" class="scn-btn py-2 rounded text-[13px] font-medium text-muted" aria-pressed="false">Low</button>
+                <button data-scn="medium" class="scn-btn py-2 rounded text-[13px] font-medium text-ice bg-cyan/15" aria-pressed="true">Medium</button>
+                <button data-scn="high" class="scn-btn py-2 rounded text-[13px] font-medium text-muted" aria-pressed="false">High</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Funnel stat row -->
+          <div class="mt-8 grid grid-cols-2 lg:grid-cols-7 gap-px overflow-hidden rounded-lg border border-line bg-line">
+            <div class="bg-card px-4 py-5">
+              <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Contacts</div>
+              <div class="font-mono text-[24px] sm:text-[26px] font-semibold text-ice mt-1.5">10,000</div>
+              <div class="font-mono text-[12px] text-muted mt-1">per month</div>
+            </div>
+            <div class="bg-card px-4 py-5">
+              <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Emails</div>
+              <div class="font-mono text-[24px] sm:text-[26px] font-semibold text-ice mt-1.5">20,000</div>
+              <div class="font-mono text-[12px] text-muted mt-1">per month</div>
+            </div>
+            <div class="bg-card px-4 py-5">
+              <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Replies</div>
+              <div id="valReplies" class="font-mono text-[24px] sm:text-[26px] font-semibold text-ice mt-1.5">400</div>
+              <div id="rateReplies" class="font-mono text-[12px] text-cyan mt-1">2%</div>
+            </div>
+            <div class="bg-card px-4 py-5">
+              <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Interested</div>
+              <div id="valInterested" class="font-mono text-[24px] sm:text-[26px] font-semibold text-ice mt-1.5">80</div>
+              <div id="rateInterested" class="font-mono text-[12px] text-cyan mt-1">20%</div>
+            </div>
+            <div class="bg-card px-4 py-5">
+              <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Booked</div>
+              <div id="valBooked" class="font-mono text-[24px] sm:text-[26px] font-semibold text-ice mt-1.5">20</div>
+              <div id="rateBooked" class="font-mono text-[12px] text-cyan mt-1">25%</div>
+            </div>
+            <div class="bg-card px-4 py-5">
+              <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Held</div>
+              <div id="valHeld" class="font-mono text-[24px] sm:text-[26px] font-semibold text-ice mt-1.5">13</div>
+              <div id="rateHeld" class="font-mono text-[12px] text-cyan mt-1">65%</div>
+            </div>
+            <div class="bg-cyan/[0.08] px-4 py-5 col-span-2 lg:col-span-1">
+              <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-cyan">Closed / mo</div>
+              <div id="valClosed" class="font-mono text-[24px] sm:text-[26px] font-semibold text-cyan mt-1.5">1.3</div>
+              <div id="rateClosed" class="font-mono text-[12px] text-cyan mt-1">10%</div>
+            </div>
+          </div>
+
+          <!-- Cumulative pipeline chart (under) -->
+          <div class="mt-8">
+            <div class="mb-3">
+              <div class="label-mono">Cumulative pipeline · 90 days</div>
+            </div>
+            <svg viewBox="0 0 960 220" class="w-full" fill="none" aria-hidden="true">
+              <g stroke="#24262B" stroke-width="1">
+                <line x1="0" y1="70" x2="960" y2="70" stroke-dasharray="3 7" opacity=".5"/>
+                <line x1="0" y1="140" x2="960" y2="140" stroke-dasharray="3 7" opacity=".5"/>
+                <line x1="320" y1="10" x2="320" y2="196" stroke-dasharray="3 7" opacity=".25"/>
+                <line x1="640" y1="10" x2="640" y2="196" stroke-dasharray="3 7" opacity=".25"/>
+              </g>
+              <path id="calcArea" class="calc-chart-area draw" d="M0 190 C 240 184, 360 166, 480 132 C 600 98, 770 56, 950 36 L960 196 L0 196 Z" fill="rgba(34,211,238,0.08)"/>
+              <path id="calcLine" class="calc-chart-line draw" pathLength="1" d="M0 190 C 240 184, 360 166, 480 132 C 600 98, 770 56, 950 36" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="320" cy="170" r="4" fill="#0E1116" stroke="#22D3EE" stroke-width="2"/>
+              <circle cx="640" cy="94" r="4" fill="#0E1116" stroke="#22D3EE" stroke-width="2"/>
+              <circle cx="950" cy="36" r="5.5" fill="#22D3EE"/>
+            </svg>
+            <div class="flex justify-between font-mono text-[10px] text-muted/70 mt-1.5">
+              <span>Day 0</span><span>Month 1</span><span>Month 2</span><span>Month 3</span>
+            </div>
+          </div>
+
+          <!-- Output cards -->
+          <div class="mt-8 grid sm:grid-cols-3 gap-4">
+            <div class="rounded-md border border-cyan/30 bg-cyan/[0.04] p-5">
+              <div id="outPipeline" class="font-mono text-[30px] sm:text-[34px] font-semibold text-cyan leading-none">$187k</div>
+              <div class="mt-2 text-[12px] text-muted leading-snug">Annual pipeline value<br /><span class="text-muted/60">cumulative over 90 days</span></div>
+            </div>
+            <div class="rounded-md border border-line bg-navy p-5">
+              <div id="outCloses" class="font-mono text-[30px] sm:text-[34px] font-semibold text-ice leading-none">4</div>
+              <div class="mt-2 text-[12px] text-muted leading-snug">Closes per quarter<br /><span class="text-muted/60">at full ramp (month 3)</span></div>
+            </div>
+            <div class="rounded-md border border-line bg-navy p-5">
+              <div id="outFirst" class="font-mono text-[30px] sm:text-[34px] font-semibold text-ice leading-none">Mo 1–2</div>
+              <div class="mt-2 text-[12px] text-muted leading-snug">First close estimated<br /><span class="text-muted/60">after campaign launch</span></div>
+            </div>
+          </div>
+
+          <a href="#pricing" class="mt-7 inline-flex items-center gap-1.5 text-[13px] font-semibold text-cyan group">Just show me the price <svg class="transition-transform duration-200 group-hover:translate-x-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 10 (Pricing) ===================== -->
+    <section id="pricing" class="mx-auto max-w-shell px-5 py-20 md:py-28">
+      <div class="text-center max-w-2xl mx-auto">
+        <div data-reveal class="accent-bar mx-auto mb-5"></div>
+        <span data-reveal style="--d:.04s" class="label-mono">Pricing</span>
+        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">2 ways to work with us.</h2>
+        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Pay for performance, or lock in guaranteed calls. Switch between our 90-day program and 45-day sprint.</p>
+
+        <div data-reveal style="--d:.18s" class="mt-7 inline-flex items-center gap-1 rounded-pill border border-line bg-card p-1">
+          <button id="toggle90" class="dur-btn px-5 py-2 rounded-pill text-[13px] font-semibold text-ice bg-cyan/15" aria-pressed="true">90 days</button>
+          <button id="toggle45" class="dur-btn px-5 py-2 rounded-pill text-[13px] font-semibold text-muted" aria-pressed="false">45 days</button>
+        </div>
+      </div>
+
+      <div class="mt-12 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto items-stretch">
+        <!-- Performance -->
+        <div data-reveal class="rounded-lg border border-line bg-card p-7 md:p-8 flex flex-col">
+          <span class="inline-flex w-max items-center rounded-pill border border-line px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">Performance</span>
+          <div class="mt-6 flex items-baseline gap-2">
+            <span id="perfPrice" class="font-display text-[42px] font-bold text-ice leading-none">$3,000</span>
+            <span id="perfFeeLabel" class="text-[13px] text-muted">one-time setup fee</span>
+          </div>
+          <div class="mt-3 font-mono text-[15px] text-cyan">+ $200 per call held</div>
+          <p class="mt-4 text-[14px] leading-[1.7] text-muted">Only pay for meetings that actually happen — lowest commitment, fully aligned incentives.</p>
+          <ul class="mt-6 space-y-3 text-[14px] text-ice/85">
+            <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Full email infrastructure (25+ domains, 50+ mailboxes)</li>
+            <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>TAM mapping, enrichment &amp; triple-verified data</li>
+            <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Copywriting &amp; multi-step campaigns</li>
+            <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Inbox management &amp; meetings booked for you</li>
+          </ul>
+          <a href="#book" class="btn btn-primary justify-center mt-8 w-full">Get started</a>
+        </div>
+
+        <!-- Trust (highlighted) -->
+        <div data-reveal style="--d:.08s" class="relative rounded-lg border border-cyan/40 bg-card p-7 md:p-8 flex flex-col">
+          <span class="absolute -top-3 left-7 inline-flex items-center rounded-pill bg-cyan px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[#07151A] font-semibold">Guaranteed calls</span>
+          <span class="inline-flex w-max items-center rounded-pill border border-cyan/40 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-cyan">Trust</span>
+          <div class="mt-6 flex items-baseline gap-2">
+            <span id="trustPrice" class="font-display text-[42px] font-bold text-ice leading-none">$8,000</span>
+            <span id="trustFeeLabel" class="text-[13px] text-muted">one-time 90-day fee</span>
+          </div>
+          <div id="trustGuarantee" class="mt-3 font-mono text-[15px] text-cyan">20 calls guaranteed</div>
+          <p class="mt-4 text-[14px] leading-[1.7] text-muted">A fixed fee with a guaranteed number of calls — maximum certainty on output.</p>
+          <ul class="mt-6 space-y-3 text-[14px] text-ice/85">
+            <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Everything in the Performance plan</li>
+            <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>A guaranteed number of calls held</li>
+            <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Fixed, predictable fee — no per-call billing</li>
+            <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Priority strategy &amp; weekly reporting</li>
+          </ul>
+          <a href="#book" class="btn btn-primary justify-center mt-8 w-full">Get started</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 11 (Book a call / calendar) ===================== -->
+    <section id="book" class="border-y border-line bg-[#0B0D10]">
+      <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
+        <div class="text-center max-w-2xl mx-auto">
+          <div data-reveal class="inline-flex items-center gap-2.5 rounded-pill border border-line bg-card/60 px-3.5 py-1.5 mb-6">
+            <span class="dot-pulse h-2 w-2 rounded-full bg-success"></span>
+            <span class="font-mono text-[12px] tracking-wide text-ice/80">Now booking</span>
+            <span class="text-muted">·</span>
+            <span class="font-mono text-[12px] tracking-wide text-muted">2 slots open this <span class="booking-month">month</span></span>
+          </div>
+          <h2 data-reveal style="--d:.06s" class="h2-display text-[30px] sm:text-[38px] md:text-[44px] text-ice">Book a free consultation with Manny.</h2>
+          <p data-reveal style="--d:.12s" class="mt-4 text-[16px] leading-[1.7] text-muted">Pick a time that works and we'll map out exactly how Cold ACQuisition fills your pipeline. 30 minutes, no pressure.</p>
+        </div>
+
+        <div data-reveal style="--d:.16s" class="mt-10 max-w-4xl mx-auto rounded-lg border border-line bg-card overflow-hidden p-2 sm:p-3">
+          <!-- Cal.com inline embed (Intro with Manny) -->
+          <div style="width:100%;min-height:640px;overflow:auto" id="my-cal-inline-intro-with-manny-coldacq"></div>
+        </div>
+
+        <script type="text/javascript">
+          (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+          Cal("init", "intro-with-manny-coldacq", {origin:"https://app.cal.com"});
+          Cal.ns["intro-with-manny-coldacq"]("inline", {
+            elementOrSelector:"#my-cal-inline-intro-with-manny-coldacq",
+            config: {"layout":"month_view","useSlotsViewOnSmallScreen":"true","theme":"dark"},
+            calLink: "manny-coldacq/intro-with-manny-coldacq",
+          });
+          Cal.ns["intro-with-manny-coldacq"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#0A0F14"},"dark":{"cal-brand":"#22D3EE"}},"hideEventTypeDetails":false,"layout":"month_view"});
+        </script>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 12 (FAQ) ===================== -->
+    <section id="faq" class="mx-auto max-w-shell px-5 py-20 md:py-28">
+      <div class="max-w-2xl">
+        <div data-reveal class="accent-bar mb-5"></div>
+        <span data-reveal style="--d:.04s" class="label-mono">FAQs</span>
+        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">Questions? We've got answers.</h2>
+      </div>
+
+      <div id="faqAccordion" data-reveal class="mt-10 max-w-3xl border-t border-line">
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">What's included in the service?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">Email infrastructure, your TAM map, data enrichment, copywriting, and campaigns touching 6–10k leads a month, inbox management, and meetings booked straight onto your calendar.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">How long is the contract?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">Our proof-of-concept is 3 months — the time we recommend, since performance usually improves the longer we run. If you'd rather start smaller, we can run a 45-day sprint at a higher rate.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">When will I start getting leads?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">It varies by client, but we expect leads in the first week of sending. By the first two weeks you should start seeing demos booked on your calendar.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">How many leads do you contact every month?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">Your 50 mailboxes send ~1,000 emails daily. Running 2–3 step cadences, we touch between 6,000 and 10,000 leads every month — depending on strategy and TAM.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">How many leads and meetings should I expect?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">We won't know for certain until we test the market — some niches are tougher than others. That's exactly why we offer the Performance plan, where you only pay per meeting held.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">What if I don't get results?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">We don't take on clients we don't think we can help. If we bring you on, it's because we expect great results — and with the Performance plan, you only pay per meeting held.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">How do you protect my domain reputation?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">We never send from your primary domain. We build fresh infrastructure on subdomains, so if anything lands in spam it only affects our subdomain — which we can rebuild. Your main domain is never at risk.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">What visibility do I have on the process?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">You're kept up to date at every step — list delivery, copywriting, campaign changes, everything in between — in constant communication via Slack.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">Can I see emails sent, prospects contacted, replies and other metrics?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">Yes. You get full visibility into our outbound metrics: leads contacted, emails sent, OOO %, reply rate, interested leads, and bounce rates.</div></div>
+        </div>
+        <div class="acc-item border-b border-line">
+          <button class="acc-trigger w-full flex items-center justify-between gap-5 py-5 text-left" aria-expanded="false">
+            <span class="text-[16px] sm:text-[17px] font-medium text-ice pr-4">If we part ways, what happens to the data?</span>
+            <span class="acc-icon shrink-0 text-cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="acc-body overflow-hidden" style="max-height:0"><div class="pb-5 text-[15px] leading-[1.7] text-muted">Everything we send you is yours to keep — your TAM, enriched lead lists, copywriting, and campaign analytics — to power your future initiatives.</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== BLOCK 13 (Footer) ===================== -->
+  <footer id="about" class="relative z-10 border-t border-line">
+    <div class="mx-auto max-w-shell px-5 py-14 md:py-16">
+      <div class="grid gap-10 md:grid-cols-[1.5fr_1fr_1.2fr]">
+        <div>
+          <div class="font-display text-[20px] font-bold tracking-tight text-ice">Cold <span class="text-cyan">ACQ</span>uisition</div>
+          <p class="mt-3 max-w-xs text-[15px] leading-[1.6] text-muted">Cold ACQuisition systems = deal flow.</p>
+          <a href="#book" class="btn btn-primary mt-6">Book a call</a>
+        </div>
+        <div>
+          <div class="label-mono mb-4">Quick links</div>
+          <ul class="space-y-2.5 text-[14px]">
+            <li><a href="#process" class="text-muted hover:text-ice transition-colors">Process</a></li>
+            <li><a href="#service" class="text-muted hover:text-ice transition-colors">Service</a></li>
+            <li><a href="#results" class="text-muted hover:text-ice transition-colors">Results</a></li>
+            <li><a href="#pricing" class="text-muted hover:text-ice transition-colors">Pricing</a></li>
+            <li><a href="#faq" class="text-muted hover:text-ice transition-colors">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="label-mono mb-4">Get in touch</div>
+          <div class="flex items-center gap-3">
+            <span class="h-12 w-12 rounded-full bg-no-repeat shrink-0" style="background-image:url('assets/manny.png');background-size:175%;background-position:50% 22%" role="img" aria-label="Manny"></span>
+            <div>
+              <div class="text-[14px] font-medium text-ice">Manny</div>
+              <div class="text-[12px] text-muted">Founder</div>
+            </div>
+          </div>
+          <a href="mailto:manuel@coldacq.com" class="mt-4 inline-flex items-center gap-2 text-[14px] text-cyan hover:text-cyan-dark transition-colors"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>manuel@coldacq.com</a>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-6 border-t border-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="text-[13px] text-muted">© 2026 Cold Acquisition LLC · 30 N Gould St, Sheridan, WY 82801</div>
+        <div class="flex items-center gap-6 text-[13px]">
+          <a href="terms.html" class="text-muted hover:text-ice transition-colors">Terms of Service</a>
+          <a href="privacy.html" class="text-muted hover:text-ice transition-colors">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Current booking month (hero pill + calendar pill)
+    (function () {
+      const m = new Date().toLocaleString('en-US', { month: 'long' });
+      const hero = document.getElementById('bookingMonth');
+      if (hero) hero.textContent = m;
+      document.querySelectorAll('.booking-month').forEach((el) => (el.textContent = m));
+    })();
+
+    // Mobile menu toggle
+    (function () {
+      const btn = document.getElementById('menuBtn');
+      const menu = document.getElementById('mobileMenu');
+      const icon = document.getElementById('menuIcon');
+      let open = false;
+      const openSvg = '<line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/>';
+      const closeSvg = '<line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/>';
+      btn.addEventListener('click', () => {
+        open = !open;
+        menu.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', String(open));
+        icon.innerHTML = open ? closeSvg : openSvg;
+      });
+      menu.querySelectorAll('a').forEach((a) =>
+        a.addEventListener('click', () => {
+          open = false;
+          menu.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+          icon.innerHTML = openSvg;
+        })
+      );
+    })();
+
+    // Generic word rotator (opacity/transform only)
+    function makeRotator(elId, words, interval) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      let i = 0;
+      setInterval(() => {
+        el.classList.add('swap');
+        setTimeout(() => {
+          i = (i + 1) % words.length;
+          el.textContent = words[i];
+          el.classList.remove('swap');
+        }, 280);
+      }, interval);
+    }
+
+    makeRotator('industryRotator', [
+      'Logistics', 'Amazon agencies', 'Commercial services', 'B2B SaaS',
+      'AgTech', 'FinTech', 'Manufacturing', '3PL providers'
+    ], 2400);
+
+    makeRotator('valueRotator', [
+      'Completely done for you',
+      'The Cold ACQuisition system',
+      'Without hiring 10 SDRs',
+      '10 SDRs for the price of 1'
+    ], 2600);
+
+    // Scroll reveal
+    (function () {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('in');
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+      );
+      document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+    })();
+
+    // Accordions (results + FAQ)
+    function initAccordion(id, openFirst) {
+      const acc = document.getElementById(id);
+      if (!acc) return;
+      const items = [...acc.querySelectorAll('.acc-item')];
+      function setOpen(item, open) {
+        const body = item.querySelector('.acc-body');
+        const trig = item.querySelector('.acc-trigger');
+        const icon = item.querySelector('.acc-icon');
+        trig.setAttribute('aria-expanded', String(open));
+        body.style.maxHeight = open ? body.scrollHeight + 'px' : '0px';
+        if (icon) icon.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+        item.classList.toggle('acc-open', open);
+      }
+      items.forEach((item) => {
+        item.querySelector('.acc-trigger').addEventListener('click', () => {
+          const isOpen = item.querySelector('.acc-trigger').getAttribute('aria-expanded') === 'true';
+          items.forEach((i) => { if (i !== item) setOpen(i, false); });
+          setOpen(item, !isOpen);
+        });
+      });
+      if (openFirst) setOpen(items[0], true);
+      window.addEventListener('resize', () => {
+        items.forEach((i) => {
+          if (i.classList.contains('acc-open')) {
+            const b = i.querySelector('.acc-body');
+            b.style.maxHeight = b.scrollHeight + 'px';
+          }
+        });
+      });
+    }
+    initAccordion('resultsAccordion', true);
+    initAccordion('faqAccordion', false);
+
+    // Voice-note player (Isaac Gross)
+    (function () {
+      const wf = document.getElementById('waveform');
+      const audio = document.getElementById('vnAudio');
+      const btn = document.getElementById('vnPlay');
+      const timeEl = document.getElementById('vnTime');
+      if (!wf || !audio || !btn) return;
+
+      const heights = [30,55,40,70,50,85,45,60,35,75,55,90,40,65,50,80,45,70,30,55,65,45,75,50,60,35,55,40,70,45,60,50];
+      wf.innerHTML = heights
+        .map((h) => `<span class="vn-bar inline-block w-[3px] rounded-full" style="height:${h}%;background-color:rgba(34,211,238,0.25)"></span>`)
+        .join('');
+      const bars = [...wf.querySelectorAll('.vn-bar')];
+
+      const playIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      const pauseIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+
+      const fmt = (s) => {
+        if (!isFinite(s) || s < 0) return '0:00';
+        const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+        return m + ':' + String(sec).padStart(2, '0');
+      };
+      function paint() {
+        const frac = audio.duration ? audio.currentTime / audio.duration : 0;
+        const active = Math.round(frac * bars.length);
+        bars.forEach((b, i) => { b.style.backgroundColor = i < active ? '#22D3EE' : 'rgba(34,211,238,0.25)'; });
+      }
+
+      audio.addEventListener('loadedmetadata', () => {
+        // Some .ogg/opus voice notes report Infinity duration until seeked — force-resolve it.
+        if (!isFinite(audio.duration)) {
+          audio.currentTime = 1e101;
+          audio.addEventListener('timeupdate', function fix() {
+            audio.removeEventListener('timeupdate', fix);
+            audio.currentTime = 0;
+            timeEl.textContent = fmt(audio.duration);
+          });
+        } else {
+          timeEl.textContent = fmt(audio.duration);
+        }
+      });
+      audio.addEventListener('timeupdate', () => { paint(); timeEl.textContent = fmt(audio.duration - audio.currentTime); });
+      audio.addEventListener('ended', () => { btn.innerHTML = playIcon; audio.currentTime = 0; paint(); timeEl.textContent = fmt(audio.duration); });
+      btn.addEventListener('click', () => {
+        if (audio.paused) { audio.play(); btn.innerHTML = pauseIcon; }
+        else { audio.pause(); btn.innerHTML = playIcon; }
+      });
+      wf.addEventListener('click', (e) => {
+        const rect = wf.getBoundingClientRect();
+        const frac = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+        if (audio.duration) { audio.currentTime = frac * audio.duration; paint(); }
+      });
+    })();
+
+    // Pipeline forecast calculator
+    (function () {
+      const SCN = {
+        low:    { reply: 0.013, interested: 0.07, book: 0.12, show: 0.35, first: 'Mo 2–3' },
+        medium: { reply: 0.02,  interested: 0.20, book: 0.25, show: 0.65, first: 'Mo 1–2' },
+        high:   { reply: 0.03,  interested: 0.30, book: 0.50, show: 0.90, first: 'Mo 1' },
+      };
+      const EMAILS = 20000;
+      let scn = 'medium';
+      const $ = (id) => document.getElementById(id);
+      const aov = $('calcAOV'), ret = $('calcRetention'), ltv = $('calcLTV'), close = $('calcClose');
+      if (!aov) return;
+
+      const pct = (x) => { const v = x * 100; return (Number.isInteger(v) ? v : v.toFixed(1)) + '%'; };
+      const money = (n) => n >= 1e6 ? '$' + (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? '$' + Math.round(n / 1e3) + 'k' : '$' + Math.round(n);
+      const num = (n) => n >= 10 ? Math.round(n).toLocaleString() : (Math.round(n * 10) / 10).toString();
+      function animateNum(el, to, fmt) {
+        const from = el._cur || 0, start = performance.now(), dur = 550;
+        function tick(t) {
+          const p = Math.min((t - start) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+          el.textContent = fmt(from + (to - from) * e);
+          if (p < 1) requestAnimationFrame(tick); else el._cur = to;
+        }
+        requestAnimationFrame(tick);
+      }
+      function redrawChart() {
+        ['calcLine', 'calcArea'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.remove('draw'); void el.getBoundingClientRect(); el.classList.add('draw');
+        });
+      }
+
+      function recompute() {
+        const r = SCN[scn];
+        const replies = EMAILS * r.reply;
+        const interested = replies * r.interested;
+        const booked = interested * r.book;
+        const held = booked * r.show;
+        const closeRate = (parseFloat(close.value) || 10) / 100;
+        const closed = held * closeRate;
+        const LTV = parseFloat(ltv.value) || 0;
+
+        $('rateReplies').textContent = pct(r.reply);   animateNum($('valReplies'), replies, num);
+        $('rateInterested').textContent = pct(r.interested); animateNum($('valInterested'), interested, num);
+        $('rateBooked').textContent = pct(r.book);     animateNum($('valBooked'), booked, num);
+        $('rateHeld').textContent = pct(r.show);       animateNum($('valHeld'), held, num);
+        $('rateClosed').textContent = pct(closeRate);  animateNum($('valClosed'), closed, num);
+
+        animateNum($('outPipeline'), closed * 12 * LTV, money);
+        animateNum($('outCloses'), Math.round(closed * 3), (v) => Math.round(v).toString());
+        $('outFirst').textContent = r.first;
+        $('calcCloseVal').textContent = Math.round(closeRate * 100) + '%';
+      }
+
+      const link = () => { ltv.value = Math.round((parseFloat(aov.value) || 0) * (parseFloat(ret.value) || 0)); };
+      aov.addEventListener('input', () => { link(); recompute(); });
+      ret.addEventListener('input', () => { link(); recompute(); });
+      ltv.addEventListener('input', () => {
+        const a = parseFloat(aov.value) || 0;
+        if (a > 0) ret.value = Math.round(((parseFloat(ltv.value) || 0) / a) * 10) / 10;
+        recompute();
+      });
+      close.addEventListener('input', recompute);
+      document.querySelectorAll('#calcScenario .scn-btn').forEach((b) => {
+        b.addEventListener('click', () => {
+          scn = b.dataset.scn;
+          document.querySelectorAll('#calcScenario .scn-btn').forEach((x) => {
+            x.classList.remove('text-ice', 'bg-cyan/15'); x.classList.add('text-muted'); x.setAttribute('aria-pressed', 'false');
+          });
+          b.classList.add('text-ice', 'bg-cyan/15'); b.classList.remove('text-muted'); b.setAttribute('aria-pressed', 'true');
+          recompute();
+          redrawChart();
+        });
+      });
+      recompute();
+    })();
+
+    // Pricing 90/45-day toggle
+    (function () {
+      const data = {
+        '90': { perf: '$3,000', perfFee: 'one-time setup fee', trust: '$8,000', trustFee: 'one-time 90-day fee', guar: '20 calls guaranteed' },
+        '45': { perf: '$1,750', perfFee: 'one-time setup fee', trust: '$4,000', trustFee: 'one-time 45-day fee', guar: '7 calls guaranteed' },
+      };
+      const b90 = document.getElementById('toggle90'), b45 = document.getElementById('toggle45');
+      if (!b90) return;
+      function set(d) {
+        const x = data[d];
+        document.getElementById('perfPrice').textContent = x.perf;
+        document.getElementById('perfFeeLabel').textContent = x.perfFee;
+        document.getElementById('trustPrice').textContent = x.trust;
+        document.getElementById('trustFeeLabel').textContent = x.trustFee;
+        document.getElementById('trustGuarantee').textContent = x.guar;
+        const on = d === '90' ? b90 : b45, off = d === '90' ? b45 : b90;
+        on.classList.add('text-ice', 'bg-cyan/15'); on.classList.remove('text-muted'); on.setAttribute('aria-pressed', 'true');
+        off.classList.remove('text-ice', 'bg-cyan/15'); off.classList.add('text-muted'); off.setAttribute('aria-pressed', 'false');
+      }
+      b90.addEventListener('click', () => set('90'));
+      b45.addEventListener('click', () => set('45'));
+    })();
+  </script>
+</body>
+</html>

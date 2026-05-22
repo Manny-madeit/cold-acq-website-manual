@@ -1,0 +1,24 @@
+# --- Dependencies / local dev tooling (not needed for the static site) ---
+node_modules/
+package.json
+package-lock.json
+serve.mjs
+screenshot.mjs
+
+# --- Local reference material & build artifacts ---
+temporary screenshots/
+_docx_extract/
+brand guidelines/
+*.docx
+CLAUDE.md
+SKILL.md
+
+# --- Original unoptimized source files (clean copies live in /assets) ---
+/Isaac Gross voice note.ogg
+/Isaac testimonial screen shot.png
+/manny profile pic.png
+/Isaac Gross profile picture.jpg
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
