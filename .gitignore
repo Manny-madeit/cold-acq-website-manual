@@ -4,6 +4,9 @@ package.json
 package-lock.json
 serve.mjs
 screenshot.mjs
+make-logo.mjs
+make-icon.mjs
+make-favicon-stacked.mjs
 
 # --- Local reference material & build artifacts ---
 temporary screenshots/
