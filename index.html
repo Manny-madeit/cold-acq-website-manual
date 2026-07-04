@@ -16,7 +16,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet" />
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -156,9 +156,45 @@
     .calc-chart-area.draw { animation: calcFade 1.2s ease-out .25s forwards; }
     @keyframes calcFade { to { opacity: 1; } }
 
+    /* Brand-logo marquee ("in conversation with") */
+    .logo-marquee {
+      position: relative; width: 100%; overflow: hidden;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
+    }
+    .logo-track { display: flex; width: max-content; align-items: center; gap: 60px; animation: logoScroll 48s linear infinite; will-change: transform; }
+    .logo-marquee:hover .logo-track { animation-play-state: paused; }
+    @keyframes logoScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .logo-item { flex: none; display: inline-flex; align-items: center; justify-content: center; height: 30px; }
+    .logo-item img { height: 30px; width: auto; max-width: 148px; object-fit: contain; filter: grayscale(1) brightness(1.8) opacity(.5); transition: filter .3s ease; }
+    .logo-item:hover img { filter: grayscale(0) brightness(1) opacity(1); }
+    .logo-word { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; white-space: nowrap; color: rgba(240,249,255,0.5); transition: color .3s ease; }
+    .logo-item:hover .logo-word { color: var(--ice); }
+
+    /* Handwritten "this could be you by ..." annotation */
+    .handnote { position: relative; display: inline-block; transform: rotate(-2.5deg); }
+    .handnote-text { font-family: 'Caveat', cursive; font-weight: 700; font-size: 30px; line-height: 1.05; color: var(--cyan); white-space: nowrap; }
+    .handnote-underline { display: block; width: 220px; max-width: 100%; height: auto; margin-top: 1px; color: var(--cyan); overflow: visible; }
+    .handnote-underline path { stroke-dasharray: 260; stroke-dashoffset: 260; }
+    [data-reveal].in .handnote-underline path { animation: handDraw 1.1s cubic-bezier(0.22,0.61,0.36,1) .35s forwards; }
+    [data-reveal].in .handnote-underline path.tick { animation-delay: .95s; animation-duration: .5s; }
+    @keyframes handDraw { to { stroke-dashoffset: 0; } }
+    @media (min-width: 640px) { .handnote-text { font-size: 36px; } }
+
+    /* Rolling replies feed */
+    .reply-card { transition: opacity .4s cubic-bezier(0.22,0.61,0.36,1), transform .4s cubic-bezier(0.22,0.61,0.36,1), border-color .2s ease; }
+    .reply-card.swapping { opacity: 0; transform: translateY(10px); }
+    .reply-card:hover { border-color: rgba(34, 211, 238, 0.4); }
+    .reply-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .reply-badge--interested { background: #08232B; color: #22D3EE; }
+    .reply-badge--meeting { background: rgba(34, 211, 238, 0.12); color: #22D3EE; border: 1px solid rgba(34, 211, 238, 0.3); }
+    .wm-logo { width: 22px; height: 22px; border-radius: 4px; object-fit: contain; flex: none; filter: grayscale(1) brightness(1.7) opacity(.6); transition: filter .25s ease; }
+    .reply-card:hover .wm-logo { filter: grayscale(0) brightness(1) opacity(.95); }
+
     @media (prefers-reduced-motion: reduce) {
       *, ::before, ::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
       [data-reveal] { opacity: 1 !important; }
+      .logo-track { animation: none !important; flex-wrap: wrap; justify-content: center; row-gap: 28px; width: 100%; }
     }
   </style>
 </head>
@@ -231,7 +267,7 @@
         <div>
           <div data-reveal style="--d:0s" class="accent-bar mb-5"></div>
           <h2 data-reveal style="--d:.06s" class="h2-display text-[24px] sm:text-[28px] md:text-[31px] text-ice">
-            We'll get you <span class="text-cyan">20–30 calls</span> in the next <span class="text-cyan">90 days</span> with prospects looking for your service.
+            We'll book <span class="text-cyan">1-2 calls/week</span> for the next <span class="text-cyan">90 days</span> with prospects that need your services.
           </h2>
 
           <p data-reveal style="--d:.14s" class="h2-display mt-4 text-[30px] sm:text-[36px] md:text-[40px] text-cyan">
@@ -266,10 +302,47 @@
           </div>
 
           <p data-reveal style="--d:.24s" class="mt-5 text-[15px] leading-[1.7] text-ice/70">
-            We manage every part of the system — from email infrastructure setup and TAM mapping to data
+            We manage every part of the system, from email infrastructure setup and TAM mapping to data
             enrichment, positioning, and copywriting. <span class="text-ice">We chase, you close.</span>
           </p>
         </div>
+      </div>
+    </section>
+
+    <!-- ===================== Rolling replies feed ===================== -->
+    <section id="replies" class="border-y border-line bg-[#0B0D10]">
+      <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
+        <div class="max-w-2xl">
+          <span data-reveal style="--d:.04s" class="label-mono">Live from the pipeline</span>
+          <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">The replies keep coming in.</h2>
+          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">A rolling snapshot of interested replies our campaigns pull from real decision-makers. Roles and companies are real; names withheld.</p>
+        </div>
+
+        <div id="repliesGrid" data-reveal style="--d:.2s" class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-live="off"></div>
+
+        <div data-reveal class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
+          <p class="flex items-center gap-2.5 text-[15px] leading-[1.6] text-muted">
+            <span class="h-1.5 w-1.5 rounded-full bg-cyan dot-pulse shrink-0"></span>
+            Start now, and replies like these keep landing.
+          </p>
+          <div class="handnote">
+            <span class="handnote-text">this could be you by <span id="replyByDate">soon</span></span>
+            <svg class="handnote-underline" viewBox="0 0 220 22" fill="none" aria-hidden="true">
+              <path d="M5 14 C 55 7, 150 6, 215 12" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <path class="tick" d="M5 14 C 9 10, 13 7, 21 4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Brand-logo marquee (in conversation with) ===================== -->
+    <section aria-label="Brands in our pipeline" class="bg-navy">
+      <div class="mx-auto max-w-shell px-5 pt-14">
+        <div data-reveal class="label-mono text-center">In conversation with teams at</div>
+      </div>
+      <div class="logo-marquee mt-9 pb-14">
+        <div class="logo-track" id="logoTrack"></div>
       </div>
     </section>
 
@@ -285,11 +358,11 @@
 
         <div class="mt-14 grid grid-cols-2 md:grid-cols-4">
           <div data-reveal style="--d:.1s" class="md:border-r border-line px-4 py-3">
-            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">250k+</div>
+            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">300k+</div>
             <div class="mt-2 text-[13px] sm:text-[14px] text-muted">emails sent</div>
           </div>
           <div data-reveal style="--d:.18s" class="md:border-r border-line px-4 py-3">
-            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">$250k+</div>
+            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">$300k+</div>
             <div class="mt-2 text-[13px] sm:text-[14px] text-muted">in lifetime revenue</div>
           </div>
           <div data-reveal style="--d:.26s" class="md:border-r border-line px-4 py-3">
@@ -618,30 +691,81 @@
     <section id="testimonials" class="mx-auto max-w-shell px-5 py-20 md:py-28">
       <div class="max-w-2xl">
         <div data-reveal class="accent-bar mb-5"></div>
-        <span data-reveal style="--d:.04s" class="label-mono">Testimonials</span>
-        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">What clients have to say.</h2>
-        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">After I booked him 3 calls in a single day, he sent this:</p>
+        <span data-reveal style="--d:.04s" class="label-mono">Client spotlight</span>
+        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">From cold inbox to C-suite calendars.</h2>
+        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">One client. In a handful of weeks, our system sat him across the table from decision-makers at 8- to 10-figure brands, two of them in person.</p>
       </div>
 
       <div class="mt-10 grid lg:grid-cols-2 gap-6 items-stretch">
-        <!-- Quote + voice note -->
+        <!-- Quote + voice notes -->
         <div data-reveal class="rounded-lg border border-line bg-card p-6 md:p-8 flex flex-col min-w-0">
-          <svg class="text-cyan/30" width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.5 7C6.46 7 4 9.46 4 12.5V19h6.5v-6.5H7.5c0-1.66 1.34-3 3-3V7Zm9.5 0c-3.04 0-5.5 2.46-5.5 5.5V19H20v-6.5h-3c0-1.66 1.34-3 3-3V7Z"/></svg>
-          <blockquote class="mt-4 font-display text-[20px] sm:text-[22px] leading-[1.5] tracking-[-0.01em] text-ice">
-            "Manny worked really hard to convert interested responses into scheduled calls. We were getting responses but struggling to convert — now that he's taken over, our conversion rate has gone up."
-          </blockquote>
-
-          <div class="mt-7 rounded-md border border-line bg-navy p-4">
-            <div class="flex items-center gap-2 label-mono mb-3"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/></svg> Hear it from him</div>
-            <div class="flex items-center gap-4">
-              <button id="vnPlay" class="play-btn h-11 w-11 rounded-full bg-cyan text-[#07151A] grid place-items-center shrink-0" aria-label="Play voice note"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
-              <div id="waveform" class="flex-1 min-w-0 overflow-hidden flex items-center gap-[3px] h-9 cursor-pointer"></div>
-              <span id="vnTime" class="font-mono text-[12px] text-muted shrink-0 w-9 text-right">0:00</span>
+          <div class="label-mono">Before us / with us</div>
+          <div class="mt-4 font-display text-[20px] sm:text-[22px] leading-[1.42] tracking-[-0.01em] text-ice">
+            His last agency booked meetings that <span class="text-muted">went nowhere</span>. Ours turn into <span class="text-cyan">lunches</span>.
+          </div>
+          <div class="mt-6 space-y-3">
+            <div class="rounded-md border border-line bg-navy p-4">
+              <div class="label-mono text-muted mb-2">His last agency, 6 months</div>
+              <p class="text-[14px] leading-[1.6] text-muted">Meetings got booked, but they stalled. Prospects never let him run the audit that actually wins the account.</p>
             </div>
-            <audio id="vnAudio" preload="metadata">
-              <source src="assets/isaac-voice-note.mp3" type="audio/mpeg" />
-              <source src="assets/isaac-voice-note.ogg" type="audio/ogg" />
-            </audio>
+            <div class="rounded-md border border-cyan/30 bg-navy p-4">
+              <div class="label-mono text-cyan mb-2">With us, first weeks</div>
+              <p class="text-[14px] leading-[1.6] text-ice">Meetings that actually go somewhere. In-person lunches and sit-downs with 8- to 10-figure companies.</p>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-center gap-2 label-mono">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
+            Straight from his debriefs
+          </div>
+          <div class="mt-3 space-y-2.5">
+            <!-- Clip 1 -->
+            <div class="vn-player rounded-md border border-line bg-navy p-3.5">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="text-[12px] text-ice/80 font-medium">On working with us</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button class="vn-play play-btn h-9 w-9 rounded-full bg-cyan text-[#07151A] grid place-items-center shrink-0" aria-label="Play voice note"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+                <div class="vn-waveform flex-1 min-w-0 overflow-hidden flex items-center gap-[3px] h-7 cursor-pointer"></div>
+                <span class="vn-time font-mono text-[11px] text-muted shrink-0 w-9 text-right">0:00</span>
+              </div>
+              <audio class="vn-audio" preload="metadata">
+                <source src="assets/isaac-voice-note.mp3" type="audio/mpeg" />
+                <source src="assets/isaac-voice-note.ogg" type="audio/ogg" />
+              </audio>
+            </div>
+            <!-- Clip 2 -->
+            <div class="vn-player rounded-md border border-line bg-navy p-3.5">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="text-[12px] text-ice/80 font-medium">After the Clarins sit-down</span>
+                <span class="reply-badge reply-badge--meeting"><span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>In person</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button class="vn-play play-btn h-9 w-9 rounded-full bg-cyan text-[#07151A] grid place-items-center shrink-0" aria-label="Play voice note"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+                <div class="vn-waveform flex-1 min-w-0 overflow-hidden flex items-center gap-[3px] h-7 cursor-pointer"></div>
+                <span class="vn-time font-mono text-[11px] text-muted shrink-0 w-9 text-right">0:00</span>
+              </div>
+              <audio class="vn-audio" preload="metadata">
+                <source src="assets/isaac-clarins.mp3" type="audio/mpeg" />
+                <source src="assets/isaac-clarins.ogg" type="audio/ogg" />
+              </audio>
+            </div>
+            <!-- Clip 3 -->
+            <div class="vn-player rounded-md border border-line bg-navy p-3.5">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="text-[12px] text-ice/80 font-medium">After the Ismail meeting</span>
+                <span class="reply-badge reply-badge--meeting"><span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>In person</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button class="vn-play play-btn h-9 w-9 rounded-full bg-cyan text-[#07151A] grid place-items-center shrink-0" aria-label="Play voice note"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+                <div class="vn-waveform flex-1 min-w-0 overflow-hidden flex items-center gap-[3px] h-7 cursor-pointer"></div>
+                <span class="vn-time font-mono text-[11px] text-muted shrink-0 w-9 text-right">0:00</span>
+              </div>
+              <audio class="vn-audio" preload="metadata">
+                <source src="assets/isaac-ismail.mp3" type="audio/mpeg" />
+                <source src="assets/isaac-ismail.ogg" type="audio/ogg" />
+              </audio>
+            </div>
           </div>
 
           <div class="mt-auto pt-6 flex items-center gap-3">
@@ -653,44 +777,60 @@
           </div>
         </div>
 
-        <!-- Booked in a single day -->
+        <!-- Meetings booked for the client -->
         <div data-reveal style="--d:.08s" class="rounded-lg border border-line bg-card p-6 md:p-8 flex flex-col min-w-0">
           <div class="flex items-center justify-between">
-            <div class="label-mono">Booked in a single day</div>
-            <span class="inline-flex items-center gap-1.5 rounded-sm bg-success-bg px-2 py-1 font-mono text-[10px] font-medium tracking-wide text-success"><span class="h-1.5 w-1.5 rounded-full bg-success"></span>WED 18</span>
+            <div class="label-mono">Booked for one client</div>
+            <span class="reply-badge reply-badge--meeting"><span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>5 meetings</span>
           </div>
-          <div class="mt-5 flex items-baseline gap-2.5">
-            <span class="font-display text-[46px] font-bold text-cyan leading-none">3</span>
-            <span class="text-[15px] text-muted leading-tight">calls booked<br />for one client</span>
+          <div class="mt-5 font-display text-[21px] sm:text-[23px] leading-[1.32] tracking-[-0.01em] text-ice">
+            Two <span class="text-cyan">in-person C-suite sit-downs</span> with 8- to 10-figure brands. Three more already booked.
           </div>
 
           <div class="mt-6 space-y-2.5">
-            <div class="flex items-center gap-4 rounded-md border border-line bg-navy px-4 py-3">
-              <span class="font-mono text-[12px] text-cyan w-[58px] shrink-0">11:00 AM</span>
-              <div class="min-w-0">
-                <div class="text-[14px] text-ice font-medium truncate">Punit</div>
-                <div class="text-[12px] text-muted truncate">Growth Marketing Manager · America &amp; Beyond</div>
+            <div class="flex items-center gap-3 rounded-md border border-line bg-navy px-4 py-3">
+              <img class="wm-logo" alt="" data-domain="clarins.com" />
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] text-ice font-medium truncate">Groupe Clarins</div>
+                <div class="text-[12px] text-muted truncate">President, North America</div>
               </div>
+              <span class="reply-badge reply-badge--meeting shrink-0"><span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>In person</span>
             </div>
-            <div class="flex items-center gap-4 rounded-md border border-line bg-navy px-4 py-3">
-              <span class="font-mono text-[12px] text-cyan w-[58px] shrink-0">11:30 AM</span>
-              <div class="min-w-0">
-                <div class="text-[14px] text-ice font-medium truncate">Guerry</div>
-                <div class="text-[12px] text-muted truncate">CEO · 3rd Rock Essentials</div>
+            <div class="flex items-center gap-3 rounded-md border border-line bg-navy px-4 py-3">
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] text-ice font-medium truncate">Ismail / Bisconni</div>
+                <div class="text-[12px] text-muted truncate">Senior GM, Export</div>
               </div>
+              <span class="reply-badge reply-badge--meeting shrink-0"><span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>In person</span>
             </div>
-            <div class="flex items-center gap-4 rounded-md border border-line bg-navy px-4 py-3">
-              <span class="font-mono text-[12px] text-cyan w-[58px] shrink-0">12:30 PM</span>
-              <div class="min-w-0">
-                <div class="text-[14px] text-ice font-medium truncate">Jon</div>
-                <div class="text-[12px] text-muted truncate">CEO · Composabl</div>
+            <div class="flex items-center gap-3 rounded-md border border-line bg-navy px-4 py-3">
+              <img class="wm-logo" alt="" data-domain="trendsinternational.com" />
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] text-ice font-medium truncate">Trends International</div>
+                <div class="text-[12px] text-muted truncate">Director, Digital Partnerships</div>
               </div>
+              <span class="reply-badge reply-badge--interested shrink-0">Booked</span>
+            </div>
+            <div class="flex items-center gap-3 rounded-md border border-line bg-navy px-4 py-3">
+              <img class="wm-logo" alt="" data-domain="blueantmedia.com" />
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] text-ice font-medium truncate">Blue Ant Media</div>
+                <div class="text-[12px] text-muted truncate">Marketing</div>
+              </div>
+              <span class="reply-badge reply-badge--interested shrink-0">Booked</span>
+            </div>
+            <div class="flex items-center gap-3 rounded-md border border-line bg-navy px-4 py-3">
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] text-ice font-medium truncate">Inbound referral</div>
+                <div class="text-[12px] text-muted truncate">Sourced via a Nintendo contact</div>
+              </div>
+              <span class="reply-badge reply-badge--interested shrink-0">Booked</span>
             </div>
           </div>
 
-          <div class="mt-auto pt-6 flex items-center gap-2 text-[13px] text-muted">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Booked straight onto the client's calendar.
+          <div class="mt-auto pt-6 flex items-start gap-2 text-[13px] leading-[1.5] text-muted">
+            <svg class="mt-[3px] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Est. <span class="text-ice font-medium">$300k+</span> in potential lifetime value across the five.</span>
           </div>
         </div>
       </div>
@@ -1154,58 +1294,242 @@
     initAccordion('resultsAccordion', true);
     initAccordion('faqAccordion', false);
 
-    // Voice-note player (Isaac Gross)
+    // Voice-note players (Isaac Gross) — generalized to any number of .vn-player blocks
     (function () {
-      const wf = document.getElementById('waveform');
-      const audio = document.getElementById('vnAudio');
-      const btn = document.getElementById('vnPlay');
-      const timeEl = document.getElementById('vnTime');
-      if (!wf || !audio || !btn) return;
-
-      const heights = [30,55,40,70,50,85,45,60,35,75,55,90,40,65,50,80,45,70,30,55,65,45,75,50,60,35,55,40,70,45,60,50];
-      wf.innerHTML = heights
-        .map((h) => `<span class="vn-bar inline-block w-[3px] rounded-full" style="height:${h}%;background-color:rgba(34,211,238,0.25)"></span>`)
-        .join('');
-      const bars = [...wf.querySelectorAll('.vn-bar')];
+      const players = [...document.querySelectorAll('.vn-player')];
+      if (!players.length) return;
+      const audios = [];
 
       const playIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
       const pauseIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
-
       const fmt = (s) => {
         if (!isFinite(s) || s < 0) return '0:00';
         const m = Math.floor(s / 60), sec = Math.floor(s % 60);
         return m + ':' + String(sec).padStart(2, '0');
       };
-      function paint() {
-        const frac = audio.duration ? audio.currentTime / audio.duration : 0;
-        const active = Math.round(frac * bars.length);
-        bars.forEach((b, i) => { b.style.backgroundColor = i < active ? '#22D3EE' : 'rgba(34,211,238,0.25)'; });
+      // Stable per-player pseudo-random waveform so each clip looks distinct.
+      function waveHeights(seed, n) {
+        const out = [];
+        for (let i = 0; i < n; i++) {
+          const v = Math.sin(seed * 12.9898 + i * 4.1414) * 43758.5453;
+          out.push(28 + Math.round((v - Math.floor(v)) * 64));
+        }
+        return out;
       }
 
-      audio.addEventListener('loadedmetadata', () => {
-        // Some .ogg/opus voice notes report Infinity duration until seeked — force-resolve it.
-        if (!isFinite(audio.duration)) {
-          audio.currentTime = 1e101;
-          audio.addEventListener('timeupdate', function fix() {
-            audio.removeEventListener('timeupdate', fix);
-            audio.currentTime = 0;
-            timeEl.textContent = fmt(audio.duration);
-          });
-        } else {
-          timeEl.textContent = fmt(audio.duration);
+      players.forEach((root, idx) => {
+        const wf = root.querySelector('.vn-waveform');
+        const audio = root.querySelector('.vn-audio');
+        const btn = root.querySelector('.vn-play');
+        const timeEl = root.querySelector('.vn-time');
+        if (!wf || !audio || !btn) return;
+        audios.push(audio);
+
+        wf.innerHTML = waveHeights(idx + 1, 32)
+          .map((h) => `<span class="vn-bar inline-block w-[3px] rounded-full" style="height:${h}%;background-color:rgba(34,211,238,0.25)"></span>`)
+          .join('');
+        const bars = [...wf.querySelectorAll('.vn-bar')];
+
+        function paint() {
+          const frac = audio.duration ? audio.currentTime / audio.duration : 0;
+          const active = Math.round(frac * bars.length);
+          bars.forEach((b, i) => { b.style.backgroundColor = i < active ? '#22D3EE' : 'rgba(34,211,238,0.25)'; });
         }
+        audio.addEventListener('loadedmetadata', () => {
+          // Some .ogg/opus voice notes report Infinity duration until seeked — force-resolve it.
+          if (!isFinite(audio.duration)) {
+            audio.currentTime = 1e101;
+            audio.addEventListener('timeupdate', function fix() {
+              audio.removeEventListener('timeupdate', fix);
+              audio.currentTime = 0;
+              if (timeEl) timeEl.textContent = fmt(audio.duration);
+            });
+          } else if (timeEl) {
+            timeEl.textContent = fmt(audio.duration);
+          }
+        });
+        audio.addEventListener('timeupdate', () => { paint(); if (timeEl) timeEl.textContent = fmt(audio.duration - audio.currentTime); });
+        audio.addEventListener('ended', () => { btn.innerHTML = playIcon; audio.currentTime = 0; paint(); if (timeEl) timeEl.textContent = fmt(audio.duration); });
+        audio.addEventListener('play', () => { audios.forEach((a) => { if (a !== audio) a.pause(); }); });
+        btn.addEventListener('click', () => {
+          if (audio.paused) { audio.play(); btn.innerHTML = pauseIcon; }
+          else { audio.pause(); btn.innerHTML = playIcon; }
+        });
+        audio.addEventListener('pause', () => { if (!audio.ended) btn.innerHTML = playIcon; });
+        wf.addEventListener('click', (e) => {
+          const rect = wf.getBoundingClientRect();
+          const frac = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+          if (audio.duration) { audio.currentTime = frac * audio.duration; paint(); }
+        });
       });
-      audio.addEventListener('timeupdate', () => { paint(); timeEl.textContent = fmt(audio.duration - audio.currentTime); });
-      audio.addEventListener('ended', () => { btn.innerHTML = playIcon; audio.currentTime = 0; paint(); timeEl.textContent = fmt(audio.duration); });
-      btn.addEventListener('click', () => {
-        if (audio.paused) { audio.play(); btn.innerHTML = pauseIcon; }
-        else { audio.pause(); btn.innerHTML = playIcon; }
-      });
-      wf.addEventListener('click', (e) => {
-        const rect = wf.getBoundingClientRect();
-        const frac = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
-        if (audio.duration) { audio.currentTime = frac * audio.duration; paint(); }
-      });
+    })();
+
+    // Brand-logo marquee — real logos with graceful wordmark fallback
+    (function () {
+      const track = document.getElementById('logoTrack');
+      if (!track) return;
+      // Prefers a local asset (assets/logos/<slug>.svg) if present, else Clearbit by domain,
+      // else a styled wordmark. Local files always win once dropped in.
+      const BRANDS = [
+        { n: 'Clarins', d: 'clarins.com' },
+        { n: 'MGM', d: 'mgm.com' },
+        { n: 'CD PROJEKT RED', d: 'cdprojektred.com' },
+        { n: 'Feastables', d: 'feastables.com' },
+        { n: 'AG1', d: 'drinkag1.com' },
+        { n: 'doTERRA', d: 'doterra.com' },
+        { n: 'Tommy John', d: 'tommyjohn.com' },
+        { n: "Rothy's", d: 'rothys.com' },
+        { n: 'Faherty', d: 'fahertybrand.com' },
+        { n: 'HUM Nutrition', d: 'humnutrition.com' },
+        { n: 'Tower 28', d: 'tower28beauty.com' },
+        { n: 'Trends International', d: 'trendsinternational.com' },
+        { n: 'Blue Ant Media', d: 'blueantmedia.com' },
+        { n: 'Cliganic', d: 'cliganic.com' },
+        { n: 'Global Icons', d: 'globalicons.com' },
+      ];
+      const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      function wordmark(item, name) { item.innerHTML = ''; const s = document.createElement('span'); s.className = 'logo-word'; s.textContent = name; item.appendChild(s); }
+      function make(b) {
+        const item = document.createElement('div');
+        item.className = 'logo-item';
+        const img = document.createElement('img');
+        img.alt = b.n; img.loading = 'lazy'; img.decoding = 'async';
+        // Prefer a local SVG (assets/logos/<slug>.svg), then Clearbit's real horizontal
+        // logo, then fall back to a clean styled wordmark (favicons look scrappy at
+        // marquee scale, so we skip them here — unlike the small in-card marks).
+        const srcs = ['assets/logos/' + slug(b.n) + '.svg', 'https://logo.clearbit.com/' + b.d];
+        let stage = 0;
+        img.onerror = function () { stage++; if (stage < srcs.length) { img.src = srcs[stage]; } else { wordmark(item, b.n); } };
+        img.src = srcs[0];
+        item.appendChild(img);
+        return item;
+      }
+      const frag = document.createDocumentFragment();
+      // Duplicate the set so the -50% translate loops seamlessly.
+      [...BRANDS, ...BRANDS].forEach((b) => frag.appendChild(make(b)));
+      track.appendChild(frag);
+    })();
+
+    // Rolling replies feed
+    (function () {
+      const grid = document.getElementById('repliesGrid');
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+      // Company -> domain, for the small watermark logo beside each name.
+      const DOMAINS = {
+        'Trends International': 'trendsinternational.com',
+        'Groupe Clarins': 'clarins.com',
+        'Tower 28 Beauty': 'tower28beauty.com',
+        'Cliganic': 'cliganic.com',
+        'Handy Laundry': 'handylaundry.com',
+        'JTM Foods': 'jtmfoods.com',
+        'doTERRA': 'doterra.com',
+        'Sucker Punch': 'suckerpunchgourmet.com',
+        'Huer Foods': 'huer.ca',
+        'CD PROJEKT RED': 'cdprojektred.com',
+        'Tommy John': 'tommyjohn.com',
+        'Blue Ant Media': 'blueantmedia.com',
+        'MGM': 'mgm.com',
+        'Global Icons': 'globalicons.com',
+        'AG1 (Athletic Greens)': 'drinkag1.com',
+        'Drizzilicious': 'drizzilicious.com',
+        'Gloves.com': 'gloves.com',
+      };
+      // Try Clearbit, then Google favicon, then drop the element so nothing broken shows.
+      function wireLogo(img) {
+        const domain = img.getAttribute('data-domain');
+        if (!domain) { img.remove(); return; }
+        const srcs = ['https://logo.clearbit.com/' + domain, 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64'];
+        let stage = 0;
+        img.onerror = function () { stage++; if (stage < srcs.length) { img.src = srcs[stage]; } else { img.onerror = null; img.remove(); } };
+        img.src = srcs[0];
+      }
+      function wireLogos(scope) { scope.querySelectorAll('img.wm-logo[data-domain]').forEach(wireLogo); }
+      // Wire the static Isaac meeting-row logos immediately (runs even if the reply feed is absent).
+      wireLogos(document);
+
+      if (!grid) return;
+      const SLOTS = 5;
+      function cardHTML(r) {
+        const meeting = r.badge === 'meeting';
+        const domain = DOMAINS[r.company] || '';
+        return `
+          <div class="mb-3">
+            <span class="reply-badge ${meeting ? 'reply-badge--meeting' : 'reply-badge--interested'}">${meeting ? '<span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>Meeting booked' : 'Interested'}</span>
+          </div>
+          <p class="text-[14px] leading-[1.6] text-ice/90 flex-1">${esc(r.snippet)}</p>
+          <div class="mt-4 pt-3.5 border-t border-line flex items-center gap-2.5">
+            <img class="wm-logo" alt="" data-domain="${esc(domain)}" />
+            <div class="min-w-0">
+              <div class="text-[13px] text-ice font-medium leading-tight truncate">${esc(r.role)}</div>
+              <div class="mt-0.5 text-[12px] text-muted truncate">${esc(r.company)}</div>
+            </div>
+          </div>`;
+      }
+      function render(card, r) { card.innerHTML = cardHTML(r); wireLogos(card); }
+      function makeCard() {
+        const el = document.createElement('article');
+        el.className = 'reply-card rounded-lg border border-line bg-card p-5 flex flex-col';
+        return el;
+      }
+
+      // Fisher-Yates on a copy (index-based, avoids Math.random bias concerns at this scale)
+      function shuffled(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+      }
+
+      function boot(pool) {
+        if (!pool.length) { grid.closest('section').style.display = 'none'; return; }
+        const n = Math.min(SLOTS, pool.length);
+        let queue = shuffled(pool);
+        const onScreen = queue.slice(0, n);
+        const cards = onScreen.map((r) => { const c = makeCard(); render(c, r); grid.appendChild(c); return c; });
+        let cursor = n;
+
+        // Only cycle if we have more items than visible slots.
+        if (pool.length <= n) return;
+
+        function nextItem() {
+          if (cursor >= queue.length) { queue = shuffled(pool); cursor = 0; }
+          const item = queue[cursor++];
+          // avoid showing a duplicate of what's currently on screen
+          if (onScreen.some((r) => r && r.snippet === item.snippet)) { return null; }
+          return item;
+        }
+        function tick() {
+          const slot = Math.floor(Math.random() * n);
+          let item = null, tries = 0;
+          while (!item && tries < queue.length) { item = nextItem(); tries++; }
+          if (item) {
+            const card = cards[slot];
+            card.classList.add('swapping');
+            setTimeout(() => { onScreen[slot] = item; render(card, item); card.classList.remove('swapping'); }, 420);
+          }
+          schedule();
+        }
+        function schedule() { setTimeout(tick, 4000 + Math.random() * 3200); }
+        schedule();
+      }
+
+      fetch('assets/replies.json', { cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data) => boot(Array.isArray(data) ? data : (data.replies || [])))
+        .catch(() => boot([]));
+    })();
+
+    // Dynamic "book by" date — always ~21 days from the visitor's current date
+    (function () {
+      const el = document.getElementById('replyByDate');
+      if (!el) return;
+      const d = new Date();
+      d.setDate(d.getDate() + 21);
+      // We don't send on weekends — roll Sat/Sun forward to the next Monday.
+      const day = d.getDay();
+      if (day === 6) d.setDate(d.getDate() + 2);
+      else if (day === 0) d.setDate(d.getDate() + 1);
+      el.textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     })();
 
     // Pipeline forecast calculator
