@@ -22,6 +22,9 @@ SKILL.md
 /manny profile pic.png
 /Isaac Gross profile picture.jpg
 
+# --- Large local video backup (site plays it via Tella embed, not from repo) ---
+/assets/Cold ACQ VSL.mp4
+
 # --- OS / editor cruft ---
 .DS_Store
 Thumbs.db
