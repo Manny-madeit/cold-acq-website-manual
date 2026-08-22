@@ -16,7 +16,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..700,0..100,0..1&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet" />
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -25,18 +25,19 @@
       theme: {
         extend: {
           colors: {
-            navy: '#070809',
+            navy: '#070A0C',
             ink: '#0A1A20',
-            ice: '#F0F9FF',
-            cyan: { DEFAULT: '#22D3EE', dark: '#06B6D4' },
-            card: '#0E1116',
-            line: '#24262B',
-            muted: '#9CA0A6',
+            ice: '#EEF3F6',
+            cyan: { DEFAULT: '#22D3EE', dark: '#06B6D4', soft: '#7FE3F2' },
+            steel: '#6E8CA0',
+            card: '#0F1319',
+            line: '#23272E',
+            muted: '#9AA1AA',
             success: { DEFAULT: '#22D3EE', bg: '#08232B' },
             warning: { DEFAULT: '#2A93A6', bg: '#0B2A33' },
           },
           fontFamily: {
-            display: ['Syne', 'sans-serif'],
+            display: ['"Bricolage Grotesque"', 'sans-serif'],
             body: ['"DM Sans"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
           },
@@ -49,13 +50,15 @@
 
   <style>
     :root {
-      --navy: #070809;
-      --ice: #F0F9FF;
+      --navy: #070A0C;
+      --ice: #EEF3F6;
       --cyan: #22D3EE;
       --cyan-dark: #06B6D4;
-      --card: #0E1116;
-      --line: #24262B;
-      --muted: #9CA0A6;
+      --cyan-soft: #7FE3F2;   /* calmer cyan for secondary highlights, so the bright cyan can be reserved */
+      --steel: #6E8CA0;       /* muted support accent — cool slate that harmonizes with cyan without buzzing */
+      --card: #0F1319;
+      --line: #23272E;
+      --muted: #9AA1AA;
       --success: #22D3EE;
     }
 
@@ -71,25 +74,95 @@
     }
     ::selection { background: rgba(34, 211, 238, 0.22); color: #F0F9FF; }
 
-    /* Operator-grade structural grid — faint, fixed, behind content. */
+    /* Film grain — fine fixed noise so the dark ground reads as a material surface, not flat digital black. */
+    .bg-noise {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.05;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Vertical side rails at the content-column edges — frame the shell so wide screens read as composed, not a column floating in empty gutters. */
+    .shell-rails { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+    .shell-rails::before, .shell-rails::after {
+      content: '';
+      position: absolute; top: 0; bottom: 0; width: 1px;
+      background: linear-gradient(180deg, transparent 0%, rgba(120, 150, 170, 0.14) 10%, rgba(120, 150, 170, 0.14) 90%, transparent 100%);
+    }
+    .shell-rails::before { left: max(14px, calc(50% - 600px)); }
+    .shell-rails::after  { right: max(14px, calc(50% - 600px)); }
+    @media (max-width: 1180px) { .shell-rails { display: none; } }
+
+    /* Surfaces read as lit objects, not flat outlines: a hairline top highlight + a soft navy-tinted drop. */
+    .bg-card {
+      box-shadow:
+        inset 0 1px 0 rgba(240, 249, 255, 0.03),
+        0 10px 30px -16px rgba(4, 18, 24, 0.75);
+    }
+
+    /* Section-band rhythm: the darker alternating bands get a faint top-lit wash + a hairline seam, so bands read as distinct planes instead of one flat black. */
+    .bg-\[\#0B0D10\] {
+      background-image:
+        linear-gradient(180deg, rgba(126, 227, 242, 0.022), transparent 26%),
+        linear-gradient(0deg, rgba(4, 18, 24, 0.35), transparent 22%);
+      box-shadow: inset 0 1px 0 rgba(240, 249, 255, 0.025);
+    }
+
+    /* Atmospheric depth — layered radial washes so the page reads as a lit space, not a flat plane. */
+    .bg-atmos {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(60% 42% at 50% -6%, rgba(34, 211, 238, 0.10), transparent 70%),
+        radial-gradient(46% 40% at 92% 8%, rgba(110, 140, 160, 0.08), transparent 72%),
+        radial-gradient(50% 46% at 6% 78%, rgba(34, 211, 238, 0.05), transparent 74%);
+    }
+
+    /* Operator-grade structural grid — faint, fixed, behind content. Softened so it is atmosphere, not a loud graph. */
     .bg-grid {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(to right, rgba(30, 48, 64, 0.16) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(30, 48, 64, 0.16) 1px, transparent 1px);
-      background-size: 64px 64px;
-      -webkit-mask-image: radial-gradient(ellipse 95% 55% at 50% 0%, #000 35%, transparent 80%);
-      mask-image: radial-gradient(ellipse 95% 55% at 50% 0%, #000 35%, transparent 80%);
+        linear-gradient(to right, rgba(120, 150, 170, 0.055) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(120, 150, 170, 0.055) 1px, transparent 1px);
+      background-size: 72px 72px;
+      -webkit-mask-image: radial-gradient(ellipse 88% 48% at 50% 0%, #000 22%, transparent 72%);
+      mask-image: radial-gradient(ellipse 88% 48% at 50% 0%, #000 22%, transparent 72%);
     }
 
     :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 4px; }
     a, button { outline: none; }
 
-    .h-display { font-family: 'Syne', sans-serif; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
-    .h2-display { font-family: 'Syne', sans-serif; font-weight: 600; letter-spacing: -0.02em; line-height: 1.12; }
+    .h-display { font-family: 'Fraunces', 'Bricolage Grotesque', serif; font-weight: 600; letter-spacing: -0.015em; line-height: 1.07; }
+
+    /* "Pipeline is oxygen" statement — wonky, characterful Fraunces with layered depth. Not a regular font. */
+    .stmt-oxygen {
+      font-variation-settings: 'opsz' 144, 'SOFT' 70, 'WONK' 1;
+      text-shadow: 0 1px 0 rgba(240, 249, 255, 0.05), 0 18px 40px rgba(4, 18, 24, 0.55);
+    }
+    .stmt-oxygen .stmt-accent {
+      background: linear-gradient(180deg, #7FE3F2 0%, #22D3EE 60%, #06B6D4 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      text-shadow: 0 0 34px rgba(34, 211, 238, 0.45);
+    }
+
+    /* Live ECG heartbeat — the trace scrolls like a vitals monitor, a cursor pulses, a heart beats. */
+    .ecg-wrap { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 88%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 88%, transparent 100%); }
+    #ecgLine { filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.55)); }
+    .ecg-scroll { animation: ecgScroll 4.2s linear infinite; }
+    @keyframes ecgScroll { from { transform: translateX(0); } to { transform: translateX(-600px); } }
+    .ecg-cursor { animation: ecgCursor 1.4s ease-in-out infinite; }
+    @keyframes ecgCursor { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+    .ecg-heart { transform-box: fill-box; transform-origin: center; filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.6)); animation: heartBeat 1.4s ease-in-out infinite; }
+    @keyframes heartBeat { 0%, 62%, 100% { transform: scale(1); } 12% { transform: scale(1.3); } 28% { transform: scale(1.04); } 42% { transform: scale(1.2); } }
+    .h2-display { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; letter-spacing: -0.02em; line-height: 1.12; }
     .label-mono {
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
@@ -102,8 +175,87 @@
     /* Buttons */
     .btn { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease; }
     .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--cyan); color: #07151A; padding: 12px 22px; border-radius: 6px; border: 1px solid var(--cyan); }
+    .btn-primary { background: var(--cyan); color: #07151A; padding: 12px 22px; border-radius: 6px; border: 1px solid var(--cyan); position: relative; overflow: hidden; }
     .btn-primary:hover { background: var(--cyan-dark); border-color: var(--cyan-dark); }
+    /* Periodic sheen sweep across primary CTAs — a subtle bit of life that draws the eye. */
+    .btn-primary::after { content: ''; position: absolute; top: 0; left: -70%; width: 45%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent); transform: skewX(-18deg); pointer-events: none; animation: btnSheen 6s ease-in-out infinite; }
+    @keyframes btnSheen { 0%, 72% { left: -70%; } 88%, 100% { left: 140%; } }
+
+    /* Soft breathing glow on focal cyan text. */
+    .glow-pulse { animation: glowPulse 3.4s ease-in-out infinite; }
+    @keyframes glowPulse { 0%, 100% { text-shadow: 0 0 0 rgba(34, 211, 238, 0); } 50% { text-shadow: 0 0 20px rgba(34, 211, 238, 0.5); } }
+
+    /* Roadmap: a small live pulse marker leads each stage label. */
+    .stage-label { position: relative; display: inline-flex; align-items: center; }
+    .stage-label::before { content: ''; width: 6px; height: 6px; border-radius: 999px; background: var(--cyan); margin-right: 9px; box-shadow: 0 0 8px rgba(34, 211, 238, 0.7); animation: pulse 2.4s ease-in-out infinite; }
+
+    /* Service-card icon lifts + glows when its card is hovered. */
+    .svc-icon { transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease; }
+    .group:hover .svc-icon { transform: translateY(-3px); border-color: rgba(34, 211, 238, 0.5); box-shadow: 0 8px 20px -8px rgba(34, 211, 238, 0.45); }
+
+    /* Reply cards fade up in a deliberate stagger on first paint. */
+    @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    .card-in { animation: cardIn .55s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+
+    /* Big serif stat for the results cards (leadgrow "recent wins" style). */
+    .res-stat { font-family: 'Fraunces', 'Bricolage Grotesque', serif; font-weight: 600; letter-spacing: -0.01em; line-height: 1; }
+
+    /* Serpentine pipeline flowchart — two rows (2nd reversed) so it fits with no horizontal scroll. */
+    .flow-node { border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 13px 10px; text-align: center; transition: border-color .2s ease, transform .2s ease; }
+    .flow-node:hover { border-color: rgba(34,211,238,.4); transform: translateY(-2px); }
+    .flow-node .flow-i { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cyan); }
+    .flow-node .flow-l { display: block; margin-top: 4px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; font-size: 14px; color: var(--ice); white-space: nowrap; }
+    .flow-node.is-goal { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 26px rgba(34,211,238,.35); }
+    .flow-node.is-goal .flow-i { color: #07151A; opacity: .65; }
+    .flow-node.is-goal .flow-l { color: #07151A; }
+    .flow-r { display: flex; align-items: center; }
+    .flow-r .flow-node { flex: 1 1 0; min-width: 0; }
+    .flow-r--rev { flex-direction: row-reverse; margin-top: 8px; }
+    .flow-c { flex: 0 0 26px; height: 2px; position: relative; background: rgba(120,150,170,.22); }
+    .flow-c i { position: absolute; top: -2px; left: 0; width: 6px; height: 6px; border-radius: 999px; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: flowDot 2.6s linear infinite; }
+    .flow-r--rev .flow-c i { animation: flowDotRev 2.6s linear infinite; }
+    @keyframes flowDot { 0% { left: 0; opacity: 0; } 12% { opacity: 1; } 80% { opacity: 1; } 100% { left: 20px; opacity: 0; } }
+    @keyframes flowDotRev { 0% { left: 20px; opacity: 0; } 12% { opacity: 1; } 80% { opacity: 1; } 100% { left: 0; opacity: 0; } }
+    .flow-turn { display: flex; justify-content: flex-end; padding-right: 11.5%; }
+    .flow-turn span { display: block; position: relative; width: 2px; height: 26px; background: linear-gradient(180deg, rgba(34,211,238,.6), rgba(34,211,238,.2)); }
+    .flow-turn span i { position: absolute; left: -2px; top: 0; width: 6px; height: 6px; border-radius: 999px; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: turnDot 2.6s linear infinite; }
+    @keyframes turnDot { 0% { top: 0; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { top: 20px; opacity: 0; } }
+    @media (max-width: 767px) {
+      .flow-r, .flow-r--rev { flex-direction: column; align-items: stretch; margin-top: 0; }
+      .flow-r .flow-node { flex: none; }
+      .flow-c { flex-basis: 18px; width: 2px; height: 18px; align-self: center; }
+      .flow-c i, .flow-r--rev .flow-c i { top: 0; left: -2px; animation: turnDot 2.6s linear infinite; }
+      .flow-turn { justify-content: center; padding-right: 0; }
+    }
+
+    /* Roadmap vertical timeline — a flowing connector rail with glowing stage nodes. */
+    .tl-line { position: absolute; left: 15px; top: 6px; bottom: 6px; width: 2px; overflow: hidden; background: linear-gradient(180deg, rgba(34,211,238,.5), rgba(34,211,238,.1)); }
+    .tl-line::after { content: ''; position: absolute; left: 0; top: 0; width: 100%; height: 200%; background: repeating-linear-gradient(180deg, rgba(34,211,238,.9) 0 3px, transparent 3px 18px); animation: tlFlow 1.3s linear infinite; }
+    @keyframes tlFlow { from { transform: translateY(-21px); } to { transform: translateY(0); } }
+    .tl-dot { position: absolute; left: 8px; top: 3px; width: 16px; height: 16px; border-radius: 999px; background: var(--navy); border: 2px solid var(--cyan); box-shadow: 0 0 12px rgba(34,211,238,.5); }
+    .tl-dot::before { content: ''; position: absolute; inset: 3px; border-radius: 999px; background: var(--cyan); animation: pulse 2.4s ease-in-out infinite; }
+
+    /* Compounding-loop diagram — ring of clickable stage nodes + a pulsing central hub. */
+    .loop-node { position: absolute; transform: translate(-50%, -50%); width: 92px; height: 92px; border-radius: 999px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 3px; border: 1px solid var(--line); background: var(--card); cursor: pointer; padding: 4px; transition: background .3s ease, border-color .3s ease, transform .3s ease, box-shadow .3s ease; }
+    .loop-node .n { font-family: 'Fraunces', 'Bricolage Grotesque', serif; font-size: 21px; font-weight: 600; line-height: 1; color: var(--muted); transition: color .3s ease; }
+    .loop-node .l { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); line-height: 1.15; transition: color .3s ease; }
+    .loop-node:hover:not(.active) { border-color: rgba(34, 211, 238, .5); }
+    .loop-node.active { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 34px rgba(34, 211, 238, .4); transform: translate(-50%, -50%) scale(1.09); }
+    .loop-node.active .n, .loop-node.active .l { color: #07151A; }
+    .loop-flow { animation: ringFlow 1.1s linear infinite; }
+    @keyframes ringFlow { to { stroke-dashoffset: -19; } }
+    .loop-hub { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+    .hub-dot { animation: pulse 2.4s ease-in-out infinite; }
+    .hub-core { animation: hubRing 2.4s ease-out infinite; }
+    @keyframes hubRing { 0% { r: 8px; opacity: .7; } 100% { r: 30px; opacity: 0; } }
+    .loop-panel.swap #loopNum, .loop-panel.swap #loopCat, .loop-panel.swap #loopTitle, .loop-panel.swap #loopDesc, .loop-panel.swap #loopIdx { animation: loopFade .42s cubic-bezier(.22,.61,.36,1); }
+    @keyframes loopFade { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+    @media (max-width: 480px) {
+      .loop-node { width: 66px; height: 66px; }
+      .loop-node .n { font-size: 15px; }
+      .loop-node .l { font-size: 6.5px; }
+      .loop-hub svg { width: 104px; height: 104px; }
+    }
     .btn-ghost { background: transparent; color: var(--cyan); padding: 12px 22px; border-radius: 6px; border: 1px solid rgba(34, 211, 238, 0.45); }
     .btn-ghost:hover { background: rgba(34, 211, 238, 0.08); border-color: var(--cyan); }
 
@@ -163,12 +315,13 @@
       mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
     }
     .logo-track { display: flex; width: max-content; align-items: center; gap: 60px; animation: logoScroll 48s linear infinite; will-change: transform; }
+    .logo-track--rev { animation-direction: reverse; animation-duration: 40s; }
     .logo-marquee:hover .logo-track { animation-play-state: paused; }
     @keyframes logoScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     .logo-item { flex: none; display: inline-flex; align-items: center; justify-content: center; height: 30px; }
     .logo-item img { height: 30px; width: auto; max-width: 148px; object-fit: contain; filter: grayscale(1) brightness(1.8) opacity(.5); transition: filter .3s ease; }
     .logo-item:hover img { filter: grayscale(0) brightness(1) opacity(1); }
-    .logo-word { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; white-space: nowrap; color: rgba(240,249,255,0.5); transition: color .3s ease; }
+    .logo-word { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; white-space: nowrap; color: rgba(240,249,255,0.5); transition: color .3s ease; }
     .logo-item:hover .logo-word { color: var(--ice); }
 
     /* Handwritten "this could be you by ..." annotation */
@@ -182,14 +335,18 @@
     @media (min-width: 640px) { .handnote-text { font-size: 36px; } }
 
     /* Rolling replies feed */
-    .reply-card { transition: opacity .4s cubic-bezier(0.22,0.61,0.36,1), transform .4s cubic-bezier(0.22,0.61,0.36,1), border-color .2s ease; }
+    .reply-card { transition: opacity .4s cubic-bezier(0.22,0.61,0.36,1), transform .4s cubic-bezier(0.22,0.61,0.36,1), border-color .2s ease, box-shadow .2s ease; }
     .reply-card.swapping { opacity: 0; transform: translateY(10px); }
-    .reply-card:hover { border-color: rgba(34, 211, 238, 0.4); }
+    .reply-card:hover { border-color: rgba(34, 211, 238, 0.4); transform: translateY(-3px); box-shadow: 0 14px 34px -18px rgba(4, 18, 24, 0.9), 0 0 0 1px rgba(34, 211, 238, 0.06); }
     .reply-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .reply-badge--interested { background: #08232B; color: #22D3EE; }
     .reply-badge--meeting { background: rgba(34, 211, 238, 0.12); color: #22D3EE; border: 1px solid rgba(34, 211, 238, 0.3); }
     .wm-logo { width: 22px; height: 22px; border-radius: 4px; object-fit: contain; flex: none; filter: grayscale(1) brightness(1.7) opacity(.6); transition: filter .25s ease; }
     .reply-card:hover .wm-logo { filter: grayscale(0) brightness(1) opacity(.95); }
+    /* Real brand logos rendered as uniform white silhouettes (monochrome), so a wall of mixed logos reads as one consistent set. Matching white initial only where no logo resolves. */
+    .wm-mark { width: 20px; height: 20px; object-fit: contain; flex: none; filter: grayscale(1) brightness(0) invert(1); opacity: .68; transition: opacity .2s ease; }
+    .reply-card:hover .wm-mark { opacity: 1; }
+    .wm-init { width: 20px; height: 20px; flex: none; display: inline-flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: rgba(240, 249, 255, 0.62); }
 
     @media (prefers-reduced-motion: reduce) {
       *, ::before, ::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
@@ -200,7 +357,10 @@
 </head>
 
 <body class="font-body antialiased">
+  <div class="bg-atmos" aria-hidden="true"></div>
   <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-noise" aria-hidden="true"></div>
+  <div class="shell-rails" aria-hidden="true"></div>
 
   <!-- ===================== NAV ===================== -->
   <header class="fixed top-0 inset-x-0 z-50 px-4 pt-4">
@@ -251,7 +411,7 @@
 
       <h1 data-reveal style="--d:.08s" class="h-display mx-auto mt-5 text-ice">
         <span class="block whitespace-nowrap" style="font-size:clamp(11px,3.3vw,30px);">
-          B2B companies with a TAM of <span class="text-cyan">30k+</span> contacts.
+          B2B companies with a TAM of <span class="text-cyan glow-pulse">30k+</span> contacts.
         </span>
         <span class="block text-muted font-semibold mt-3 text-[17px] sm:text-[19px]">
           No matter the industry&nbsp;—
@@ -267,10 +427,10 @@
         <div>
           <div data-reveal style="--d:0s" class="accent-bar mb-5"></div>
           <h2 data-reveal style="--d:.06s" class="h2-display text-[24px] sm:text-[28px] md:text-[31px] text-ice">
-            Book <span class="text-cyan">1-2 calls/week</span> for the next <span class="text-cyan">90 days</span> with prospects that need your services.
+            Book <span class="text-ice">1-2 calls/week</span> for the next <span class="text-ice">90 days</span> with prospects that need your services.
           </h2>
 
-          <p data-reveal style="--d:.14s" class="h2-display mt-4 text-[30px] sm:text-[36px] md:text-[40px] text-cyan">
+          <p data-reveal style="--d:.14s" class="h2-display glow-pulse mt-4 text-[30px] sm:text-[36px] md:text-[40px] text-cyan">
             Only pay for meetings held.
           </p>
 
@@ -305,9 +465,9 @@
     <section id="replies" class="border-y border-line bg-[#0B0D10]">
       <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
         <div class="max-w-2xl">
-          <span data-reveal style="--d:.04s" class="label-mono">Live from the pipeline</span>
+          <span data-reveal style="--d:.04s" class="label-mono inline-flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-success dot-pulse"></span>Live from the pipeline</span>
           <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">The replies keep coming in.</h2>
-          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">A rolling snapshot of interested replies our campaigns pull from real decision-makers. Roles and companies are real; names withheld.</p>
+          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">A rolling snapshot of interested replies our campaigns pull from real decision-makers. Every role and company is real; individual names are kept private.</p>
         </div>
 
         <div id="repliesGrid" data-reveal style="--d:.2s" class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-live="off"></div>
@@ -343,27 +503,41 @@
       <div class="mx-auto max-w-shell px-5 py-20 md:py-28 text-center">
         <div data-reveal class="accent-bar mx-auto mb-7"></div>
 
-        <h2 data-reveal style="--d:.06s" class="h-display text-ice text-[32px] sm:text-[44px] md:text-[52px] leading-[1.08]">
-          Pipeline is oxygen.<br />
+        <h2 data-reveal style="--d:.06s" class="stmt-oxygen h-display text-ice text-[34px] sm:text-[46px] md:text-[56px] leading-[1.06]">
+          Pipeline is <span class="stmt-accent">oxygen</span>.<br />
           We make sure you never run out.
         </h2>
 
+        <!-- Live ECG: the pipeline as a heartbeat that never flatlines. Always moving, signaling life. -->
+        <div data-reveal style="--d:.12s" class="ecg-wrap mx-auto mt-9 max-w-xl px-6" aria-hidden="true">
+          <svg viewBox="0 0 600 80" class="w-full" fill="none" preserveAspectRatio="none" style="height:64px">
+            <line x1="0" y1="44" x2="600" y2="44" stroke="rgba(120,150,170,0.13)" stroke-width="1"/>
+            <g class="ecg-scroll">
+              <path id="ecgLine" d="" stroke="#22D3EE" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <circle class="ecg-cursor" cx="556" cy="44" r="3.4" fill="#7FE3F2"/>
+            <g transform="translate(580 44)">
+              <path class="ecg-heart" d="M0 3.5 C -5.5 -1.5, -8 -5, -4.5 -7.5 C -1.8 -9.2, 0 -6, 0 -4.5 C 0 -6, 1.8 -9.2, 4.5 -7.5 C 8 -5, 5.5 -1.5, 0 3.5 Z" fill="#22D3EE"/>
+            </g>
+          </svg>
+        </div>
+
         <div class="mt-14 grid grid-cols-2 md:grid-cols-4">
           <div data-reveal style="--d:.1s" class="md:border-r border-line px-4 py-3">
-            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">300k+</div>
+            <div class="stat-num font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan" data-to="400" data-suffix="k+">400k+</div>
             <div class="mt-2 text-[13px] sm:text-[14px] text-muted">emails sent</div>
           </div>
           <div data-reveal style="--d:.18s" class="md:border-r border-line px-4 py-3">
-            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">$300k+</div>
-            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">in lifetime revenue</div>
+            <div class="stat-num font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan" data-to="450" data-prefix="$" data-suffix="k+">$450k+</div>
+            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">in revenue closed</div>
           </div>
           <div data-reveal style="--d:.26s" class="md:border-r border-line px-4 py-3">
-            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">$1M+</div>
-            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">in pipeline revenue</div>
+            <div class="stat-num font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan" data-to="1.2" data-prefix="$" data-suffix="M+" data-decimals="1">$1.2M+</div>
+            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">in pipeline generated</div>
           </div>
           <div data-reveal style="--d:.34s" class="px-4 py-3">
-            <div class="font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan">$1</div>
-            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">LTV per email sent</div>
+            <div class="stat-num font-mono text-[32px] sm:text-[40px] md:text-[44px] font-semibold text-cyan" data-to="10" data-suffix="+">10+</div>
+            <div class="mt-2 text-[13px] sm:text-[14px] text-muted">industries booked</div>
           </div>
         </div>
       </div>
@@ -385,7 +559,7 @@
       <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- card 1 -->
         <article data-reveal style="--d:.06s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
-          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+          <div class="svc-icon h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="0.7" fill="currentColor" stroke="none"/><circle cx="7" cy="17" r="0.7" fill="currentColor" stroke="none"/></svg>
           </div>
           <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">Infrastructure Setup &amp; Warm-Up</h3>
@@ -394,7 +568,7 @@
         </article>
         <!-- card 2 -->
         <article data-reveal style="--d:.12s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
-          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+          <div class="svc-icon h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>
           </div>
           <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">TAM Mapping, ICP Research &amp; Targeting</h3>
@@ -403,7 +577,7 @@
         </article>
         <!-- card 3 -->
         <article data-reveal style="--d:.18s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
-          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+          <div class="svc-icon h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 16a8 8 0 0 1 8-8"/><path d="M7.5 16a4.5 4.5 0 0 1 4.5-4.5"/><circle cx="12" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg>
           </div>
           <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">AI-Intent Scraping &amp; Signal Tracking</h3>
@@ -412,7 +586,7 @@
         </article>
         <!-- card 4 -->
         <article data-reveal style="--d:.06s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
-          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+          <div class="svc-icon h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
           </div>
           <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">Sales Assets &amp; Copywriting</h3>
@@ -421,7 +595,7 @@
         </article>
         <!-- card 5 -->
         <article data-reveal style="--d:.12s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
-          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+          <div class="svc-icon h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/></svg>
           </div>
           <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">Personalized Video Campaigns</h3>
@@ -430,7 +604,7 @@
         </article>
         <!-- card 6 -->
         <article data-reveal style="--d:.18s" class="group rounded-lg border border-line bg-card p-6 transition-colors duration-200 hover:border-cyan/40">
-          <div class="h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
+          <div class="svc-icon h-11 w-11 rounded-md border border-line bg-navy grid place-items-center text-cyan">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r="2.2" fill="currentColor" stroke="none"/></svg>
           </div>
           <h3 class="mt-5 font-display text-[18px] font-semibold text-ice">Campaign Optimization &amp; Management</h3>
@@ -456,6 +630,96 @@
       </div>
     </section>
 
+    <!-- ===================== BLOCK 4.5 (The system / operating principles) ===================== -->
+    <section id="system" class="mx-auto max-w-shell px-5 py-20 md:py-28 border-t border-line">
+      <div class="max-w-2xl">
+        <div data-reveal class="accent-bar mb-5"></div>
+        <span data-reveal style="--d:.04s" class="label-mono">The system</span>
+        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">How we actually book the meetings.</h2>
+        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Three principles run under every campaign. They are the difference between spray-and-pray and a system that compounds.</p>
+      </div>
+
+      <div class="mt-12 grid md:grid-cols-3 gap-5">
+        <article data-reveal class="group rounded-lg border border-line bg-card p-7 flex flex-col transition-colors duration-200 hover:border-cyan/40">
+          <span class="res-stat text-[40px] text-cyan/80">01</span>
+          <h3 class="mt-4 font-display text-[20px] font-semibold text-ice">Signal over spray</h3>
+          <p class="mt-2.5 text-[14px] leading-[1.7] text-muted">We reach people the moment something moves. A funding round, a new hire, a fresh launch, an open compliance clock. Timing is the message, so the note lands like it was written for that week.</p>
+        </article>
+        <article data-reveal style="--d:.08s" class="group rounded-lg border border-line bg-card p-7 flex flex-col transition-colors duration-200 hover:border-cyan/40">
+          <span class="res-stat text-[40px] text-cyan/80">02</span>
+          <h3 class="mt-4 font-display text-[20px] font-semibold text-ice">Nothing unverified</h3>
+          <p class="mt-2.5 text-[14px] leading-[1.7] text-muted">Every name, number, and claim is traced to source before it goes out. Triple-verified contacts, sub-1% bounce, and no invented specifics. No guesswork reaches your prospects.</p>
+        </article>
+        <article data-reveal style="--d:.16s" class="group rounded-lg border border-line bg-card p-7 flex flex-col transition-colors duration-200 hover:border-cyan/40">
+          <span class="res-stat text-[40px] text-cyan/80">03</span>
+          <h3 class="mt-4 font-display text-[20px] font-semibold text-ice">We double down on what replies</h3>
+          <p class="mt-2.5 text-[14px] leading-[1.7] text-muted">Real response data drives the next round, every week. Winning angles scale to new segments, the dead ones get cut. The system gets sharper the longer it runs.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 4.6 (The compounding loop) ===================== -->
+    <section id="loop" class="border-t border-line">
+      <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
+        <div class="max-w-2xl">
+          <div data-reveal class="accent-bar mb-5"></div>
+          <span data-reveal style="--d:.04s" class="label-mono">The engine</span>
+          <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">A loop that compounds.</h2>
+          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Six stages, running on repeat. Every cycle feeds the next, so the system gets sharper the longer we run it.</p>
+        </div>
+
+        <div class="mt-14 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <!-- Ring -->
+          <div data-reveal class="loop-ring relative mx-auto w-full max-w-[420px] aspect-square">
+            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+              <circle cx="200" cy="200" r="168" stroke="rgba(120,150,170,0.16)" stroke-width="1.5"/>
+              <circle cx="200" cy="200" r="168" stroke="#22D3EE" stroke-width="2" stroke-dasharray="3 16" class="loop-flow" opacity="0.55"/>
+            </svg>
+
+            <div class="loop-hub" aria-hidden="true">
+              <svg viewBox="0 0 150 150" width="140" height="140" fill="none">
+                <polygon points="75,29 118.7,60.8 102,112.2 48,112.2 31.3,60.8" stroke="rgba(34,211,238,0.22)" stroke-width="1"/>
+                <g stroke="rgba(34,211,238,0.16)" stroke-width="1">
+                  <line x1="75" y1="75" x2="75" y2="29"/><line x1="75" y1="75" x2="118.7" y2="60.8"/><line x1="75" y1="75" x2="102" y2="112.2"/><line x1="75" y1="75" x2="48" y2="112.2"/><line x1="75" y1="75" x2="31.3" y2="60.8"/>
+                </g>
+                <g fill="#22D3EE">
+                  <circle class="hub-dot" cx="75" cy="29" r="3"/>
+                  <circle class="hub-dot" cx="118.7" cy="60.8" r="3" style="animation-delay:.4s"/>
+                  <circle class="hub-dot" cx="102" cy="112.2" r="3" style="animation-delay:.8s"/>
+                  <circle class="hub-dot" cx="48" cy="112.2" r="3" style="animation-delay:1.2s"/>
+                  <circle class="hub-dot" cx="31.3" cy="60.8" r="3" style="animation-delay:1.6s"/>
+                </g>
+                <circle cx="75" cy="75" r="7" fill="#22D3EE"/>
+                <circle class="hub-core" cx="75" cy="75" r="8" fill="none" stroke="#22D3EE" stroke-width="1.5"/>
+              </svg>
+              <div class="mt-1 label-mono text-muted/70">each cycle compounds</div>
+            </div>
+
+            <button class="loop-node" data-i="0" style="left:50%;top:8%"><span class="n">01</span><span class="l">Signal</span></button>
+            <button class="loop-node" data-i="1" style="left:86.4%;top:29%"><span class="n">02</span><span class="l">Enrich</span></button>
+            <button class="loop-node" data-i="2" style="left:86.4%;top:71%"><span class="n">03</span><span class="l">Message</span></button>
+            <button class="loop-node" data-i="3" style="left:50%;top:92%"><span class="n">04</span><span class="l">Launch</span></button>
+            <button class="loop-node" data-i="4" style="left:13.6%;top:71%"><span class="n">05</span><span class="l">Meetings</span></button>
+            <button class="loop-node" data-i="5" style="left:13.6%;top:29%"><span class="n">06</span><span class="l">Optimize</span></button>
+          </div>
+
+          <!-- Detail panel -->
+          <div data-reveal style="--d:.1s" class="loop-panel rounded-lg border border-line bg-card p-8 md:p-10">
+            <div class="flex items-baseline justify-between gap-4">
+              <div class="flex items-baseline gap-3 min-w-0">
+                <span id="loopNum" class="res-stat text-[42px] text-cyan">01</span>
+                <span id="loopCat" class="label-mono">Signal mining</span>
+              </div>
+              <span id="loopIdx" class="font-mono text-[13px] text-muted/70 shrink-0">1 / 6</span>
+            </div>
+            <h3 id="loopTitle" class="mt-5 font-display text-[25px] sm:text-[29px] font-semibold text-ice leading-[1.2]">The right moment, found.</h3>
+            <p id="loopDesc" class="mt-4 text-[16px] leading-[1.7] text-muted min-h-[84px]">We track funding rounds, new hires, launches, and compliance triggers, so outreach lands the week it actually matters.</p>
+            <div class="mt-7 pt-5 border-t border-line label-mono text-muted/70">Auto-advancing · or click a node</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===================== BLOCK 5 (Roadmap) ===================== -->
     <section id="process" class="border-y border-line bg-[#0B0D10]">
       <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
@@ -470,46 +734,47 @@
           </p>
         </div>
 
-        <div class="mt-12 border-t border-line">
-          <div data-reveal class="grid md:grid-cols-[230px_1fr] gap-3 md:gap-10 py-8 border-b border-line">
-            <div class="flex items-center gap-4">
-              <span class="font-mono text-[30px] font-semibold text-cyan/25 leading-none">01</span>
-              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-cyan">Week 1–2</span>
+        <div class="mt-12 relative">
+          <div class="tl-line" aria-hidden="true"></div>
+
+          <div data-reveal class="tl-item relative pl-11 pb-10">
+            <span class="tl-dot" aria-hidden="true"></span>
+            <div class="flex items-center gap-3">
+              <span class="res-stat text-[24px] text-cyan/70">01</span>
+              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-steel">Week 1–2</span>
             </div>
-            <div>
-              <h3 class="font-display text-[22px] font-semibold text-ice">The Foundation</h3>
-              <p class="mt-3 max-w-2xl text-[15px] leading-[1.7] text-muted">We build the sending infrastructure from scratch: hundreds of email accounts across purpose-built domains, allocated across dedicated IPs and warmed before a single message goes out. In parallel, we work through your ICP with you, define the segments worth testing, and write differentiated messaging for each one. By the end of week two, the system is live.</p>
-            </div>
+            <h3 class="mt-2 font-display text-[21px] font-semibold text-ice">The Foundation</h3>
+            <p class="mt-2 max-w-2xl text-[15px] leading-[1.7] text-muted">We build the sending infrastructure from scratch: hundreds of email accounts across purpose-built domains, allocated across dedicated IPs and warmed before a single message goes out. In parallel, we work through your ICP with you, define the segments worth testing, and write differentiated messaging for each one. By the end of week two, the system is live.</p>
           </div>
-          <div data-reveal class="grid md:grid-cols-[230px_1fr] gap-3 md:gap-10 py-8 border-b border-line">
-            <div class="flex items-center gap-4">
-              <span class="font-mono text-[30px] font-semibold text-cyan/25 leading-none">02</span>
-              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-cyan">Week 3–4</span>
+
+          <div data-reveal style="--d:.06s" class="tl-item relative pl-11 pb-10">
+            <span class="tl-dot" aria-hidden="true"></span>
+            <div class="flex items-center gap-3">
+              <span class="res-stat text-[24px] text-cyan/70">02</span>
+              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-steel">Week 3–4</span>
             </div>
-            <div>
-              <h3 class="font-display text-[22px] font-semibold text-ice">Launch &amp; Grow</h3>
-              <p class="mt-3 max-w-2xl text-[15px] leading-[1.7] text-muted">Initial outreach launches and meetings with ideal prospects often start booking immediately. Early performance data and engagement insights lay the groundwork for optimization and scale.</p>
-            </div>
+            <h3 class="mt-2 font-display text-[21px] font-semibold text-ice">Launch &amp; Grow</h3>
+            <p class="mt-2 max-w-2xl text-[15px] leading-[1.7] text-muted">Initial outreach launches and meetings with ideal prospects often start booking immediately. Early performance data and engagement insights lay the groundwork for optimization and scale.</p>
           </div>
-          <div data-reveal class="grid md:grid-cols-[230px_1fr] gap-3 md:gap-10 py-8 border-b border-line">
-            <div class="flex items-center gap-4">
-              <span class="font-mono text-[30px] font-semibold text-cyan/25 leading-none">03</span>
-              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-cyan">Month 2</span>
+
+          <div data-reveal style="--d:.12s" class="tl-item relative pl-11 pb-10">
+            <span class="tl-dot" aria-hidden="true"></span>
+            <div class="flex items-center gap-3">
+              <span class="res-stat text-[24px] text-cyan/70">03</span>
+              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-steel">Month 2</span>
             </div>
-            <div>
-              <h3 class="font-display text-[22px] font-semibold text-ice">Optimize &amp; Scale</h3>
-              <p class="mt-3 max-w-2xl text-[15px] leading-[1.7] text-muted">With real response data in hand, we double down on high-performing sequences, refine messaging based on prospect engagement, and scale winning campaigns to new segments and larger lists.</p>
-            </div>
+            <h3 class="mt-2 font-display text-[21px] font-semibold text-ice">Optimize &amp; Scale</h3>
+            <p class="mt-2 max-w-2xl text-[15px] leading-[1.7] text-muted">With real response data in hand, we double down on high-performing sequences, refine messaging based on prospect engagement, and scale winning campaigns to new segments and larger lists.</p>
           </div>
-          <div data-reveal class="grid md:grid-cols-[230px_1fr] gap-3 md:gap-10 py-8 border-b border-line">
-            <div class="flex items-center gap-4">
-              <span class="font-mono text-[30px] font-semibold text-cyan/25 leading-none">04</span>
-              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-cyan">Month 3</span>
+
+          <div data-reveal style="--d:.18s" class="tl-item relative pl-11">
+            <span class="tl-dot" aria-hidden="true"></span>
+            <div class="flex items-center gap-3">
+              <span class="res-stat text-[24px] text-cyan/70">04</span>
+              <span class="font-mono text-[12px] tracking-[0.16em] uppercase text-steel">Month 3</span>
             </div>
-            <div>
-              <h3 class="font-display text-[22px] font-semibold text-ice">Systematize &amp; Expand</h3>
-              <p class="mt-3 max-w-2xl text-[15px] leading-[1.7] text-muted">The system matures into a predictable pipeline generator. We document the playbooks, expand to additional prospect segments, and hand over a process your team can run and own independently going forward.</p>
-            </div>
+            <h3 class="mt-2 font-display text-[21px] font-semibold text-ice">Systematize &amp; Expand</h3>
+            <p class="mt-2 max-w-2xl text-[15px] leading-[1.7] text-muted">The system matures into a predictable pipeline generator. We document the playbooks, expand to additional prospect segments, and hand over a process your team can run and own independently going forward.</p>
           </div>
         </div>
       </div>
@@ -528,7 +793,13 @@
         </p>
       </div>
 
-      <div class="mt-12 grid lg:grid-cols-2 gap-6 items-start">
+      <!-- The stack we run for you (flowing B&W logo carousel) -->
+      <div data-reveal class="mt-10 label-mono">The stack we run, so you don't</div>
+      <div class="logo-marquee logo-marquee--tools mt-6">
+        <div class="logo-track logo-track--rev" id="toolTrack"></div>
+      </div>
+
+      <div class="mt-14 grid lg:grid-cols-2 gap-6 items-start">
         <!-- People -->
         <div data-reveal class="rounded-lg border border-line bg-card p-6 md:p-8">
           <div class="label-mono mb-6">The people you would need</div>
@@ -595,89 +866,6 @@
       </div>
     </section>
 
-    <!-- ===================== BLOCK 7 (Selected results) ===================== -->
-    <section id="results" class="border-y border-line bg-[#0B0D10]">
-      <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
-        <div class="max-w-2xl">
-          <div data-reveal class="accent-bar mb-5"></div>
-          <span data-reveal style="--d:.04s" class="label-mono">Results</span>
-          <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">Selected results.</h2>
-          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Real outcomes from campaigns we've architected and run end-to-end. Select one to expand.</p>
-        </div>
-
-        <div id="resultsAccordion" data-reveal class="mt-10 border-t border-line">
-          <!-- 01 -->
-          <div class="acc-item border-b border-line">
-            <button class="acc-trigger w-full flex items-center gap-5 py-6 text-left" aria-expanded="false">
-              <span class="font-mono text-[15px] text-cyan/40 w-8 shrink-0">01</span>
-              <span class="flex-1 min-w-0">
-                <span class="block font-mono text-[11px] uppercase tracking-[0.16em] text-cyan">Amazon PPC Agency</span>
-                <span class="block font-display text-[20px] sm:text-[24px] font-semibold text-ice mt-1.5">Calls with 7 &amp; 8-figure DTC brands</span>
-              </span>
-              <span class="acc-icon shrink-0 text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            </button>
-            <div class="acc-body overflow-hidden" style="max-height:0">
-              <div class="pb-7 pl-[52px] max-w-2xl text-[15px] leading-[1.7] text-muted">An Amazon PPC agency landed calls with large-scale ecommerce brands — putting their team in front of 7 &amp; 8-figure DTC operators they'd struggled to reach.</div>
-            </div>
-          </div>
-          <!-- 02 -->
-          <div class="acc-item border-b border-line">
-            <button class="acc-trigger w-full flex items-center gap-5 py-6 text-left" aria-expanded="false">
-              <span class="font-mono text-[15px] text-cyan/40 w-8 shrink-0">02</span>
-              <span class="flex-1 min-w-0">
-                <span class="block font-mono text-[11px] uppercase tracking-[0.16em] text-cyan">Creative / Design Agency</span>
-                <span class="block font-display text-[20px] sm:text-[24px] font-semibold text-ice mt-1.5">30 calls in 50 days</span>
-              </span>
-              <span class="acc-icon shrink-0 text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            </button>
-            <div class="acc-body overflow-hidden" style="max-height:0">
-              <div class="pb-7 pl-[52px] max-w-2xl">
-                <p class="text-[15px] leading-[1.7] text-muted">A creative agency booked 30 calls with VC funds &amp; VC-backed startups in under two months.</p>
-                <div class="mt-4 flex flex-wrap gap-x-8 gap-y-3">
-                  <div><span class="font-mono text-[20px] font-semibold text-cyan">30</span> <span class="text-[13px] text-muted">calls booked</span></div>
-                  <div><span class="font-mono text-[20px] font-semibold text-cyan">50</span> <span class="text-[13px] text-muted">days</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- 03 -->
-          <div class="acc-item border-b border-line">
-            <button class="acc-trigger w-full flex items-center gap-5 py-6 text-left" aria-expanded="false">
-              <span class="font-mono text-[15px] text-cyan/40 w-8 shrink-0">03</span>
-              <span class="flex-1 min-w-0">
-                <span class="block font-mono text-[11px] uppercase tracking-[0.16em] text-cyan">B2B Lead-Gen Agency</span>
-                <span class="block font-display text-[20px] sm:text-[24px] font-semibold text-ice mt-1.5">40+ meetings with 3PL founders</span>
-              </span>
-              <span class="acc-icon shrink-0 text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            </button>
-            <div class="acc-body overflow-hidden" style="max-height:0">
-              <div class="pb-7 pl-[52px] max-w-2xl">
-                <p class="text-[15px] leading-[1.7] text-muted">Booked 40+ meetings with 3PL founders across three outbound sequences.</p>
-                <div class="mt-4 flex flex-wrap gap-x-8 gap-y-3">
-                  <div><span class="font-mono text-[20px] font-semibold text-cyan">3,668</span> <span class="text-[13px] text-muted">leads</span></div>
-                  <div><span class="font-mono text-[20px] font-semibold text-cyan">7,208</span> <span class="text-[13px] text-muted">emails</span></div>
-                  <div><span class="font-mono text-[20px] font-semibold text-cyan">33</span> <span class="text-[13px] text-muted">positive replies</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- 04 -->
-          <div class="acc-item border-b border-line">
-            <button class="acc-trigger w-full flex items-center gap-5 py-6 text-left" aria-expanded="false">
-              <span class="font-mono text-[15px] text-cyan/40 w-8 shrink-0">04</span>
-              <span class="flex-1 min-w-0">
-                <span class="block font-mono text-[11px] uppercase tracking-[0.16em] text-cyan">3rd-Party Logistics</span>
-                <span class="block font-display text-[20px] sm:text-[24px] font-semibold text-ice mt-1.5">$100k+ in pipeline revenue</span>
-              </span>
-              <span class="acc-icon shrink-0 text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            </button>
-            <div class="acc-body overflow-hidden" style="max-height:0">
-              <div class="pb-7 pl-[52px] max-w-2xl text-[15px] leading-[1.7] text-muted">Booked meetings with ecommerce brands doing 4,000+ orders/month, generating $100k+ in pipeline revenue.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- ===================== BLOCK 8 (Testimonials) ===================== -->
     <section id="testimonials" class="mx-auto max-w-shell px-5 py-20 md:py-28">
@@ -685,10 +873,27 @@
         <div data-reveal class="accent-bar mb-5"></div>
         <span data-reveal style="--d:.04s" class="label-mono">Client spotlight</span>
         <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">From cold inbox to C-suite calendars.</h2>
-        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">One client. In a handful of weeks, our system sat him across the table from decision-makers at 8-10 figure brands, two of them in person.</p>
+        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Across private equity, production and Amazon, our outbound sits clients across the table from the people who move their business. Here is one in full, then a handful more from other lanes.</p>
       </div>
 
-      <div class="mt-10 grid lg:grid-cols-2 gap-6 items-stretch">
+      <!-- Featured square testimonial — his words, from his voice note after a booked meeting -->
+      <figure data-reveal class="mt-10 rounded-lg border border-line bg-card p-7 md:p-10">
+        <div class="grid md:grid-cols-[auto_1fr] gap-6 md:gap-9 items-center">
+          <span class="h-24 w-24 md:h-32 md:w-32 rounded-2xl bg-no-repeat border border-line shrink-0 block mx-auto md:mx-0" style="background-image:url('assets/isaac.jpg');background-size:130%;background-position:50% 20%" role="img" aria-label="Isaac Gross"></span>
+          <div class="min-w-0">
+            <svg class="mb-3 text-cyan opacity-70" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V18h6.83v-6.83H5.5A1.67 1.67 0 0 1 7.17 9.5V6zm9 0A5.17 5.17 0 0 0 11 11.17V18h6.83v-6.83H14.5A1.67 1.67 0 0 1 16.17 9.5V6z"/></svg>
+            <blockquote class="font-display text-[23px] sm:text-[27px] md:text-[31px] leading-[1.34] tracking-[-0.015em] text-ice">
+              I've tried a lot of different cold outreach methods. <span class="text-cyan">So far, your system works the best.</span> I want to double down on it.
+            </blockquote>
+            <figcaption class="mt-5 flex items-center gap-2.5 label-mono">
+              <span class="text-ice">Isaac Gross</span>
+              <span class="text-muted">/ Amazon PPC Agency, after a booked meeting</span>
+            </figcaption>
+          </div>
+        </div>
+      </figure>
+
+      <div class="mt-6 grid lg:grid-cols-2 gap-6 items-stretch">
         <!-- Quote + voice notes -->
         <div data-reveal class="rounded-lg border border-line bg-card p-6 md:p-8 flex flex-col min-w-0">
           <div class="label-mono">Before us / with us</div>
@@ -776,7 +981,7 @@
             <span class="reply-badge reply-badge--meeting"><span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>5 meetings</span>
           </div>
           <div class="mt-5 font-display text-[21px] sm:text-[23px] leading-[1.32] tracking-[-0.01em] text-ice">
-            Two <span class="text-cyan">in-person C-suite sit-downs</span> with 8-10 figure brands. Three more already booked.
+            Two <span class="text-ice">in-person C-suite sit-downs</span> with 8-10 figure brands. Three more already booked.
           </div>
 
           <div class="mt-6 space-y-2.5">
@@ -825,6 +1030,113 @@
             <svg class="mt-[3px] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             <span>Est. <span class="text-ice font-medium">$300k+</span> in potential lifetime value across the five.</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Cross-lane proof: the same system, other verticals -->
+      <div data-reveal class="mt-6 label-mono">And in other lanes</div>
+      <div class="mt-4 grid sm:grid-cols-3 gap-4">
+        <figure data-reveal class="rounded-lg border border-line bg-card p-6 flex flex-col">
+          <span class="reply-badge reply-badge--meeting w-max"><span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>Meeting held</span>
+          <blockquote class="mt-4 font-display text-[19px] leading-[1.4] tracking-[-0.01em] text-ice">"WOW! I feel like we must chat."</blockquote>
+          <figcaption class="mt-auto pt-5 text-[13px] leading-snug"><span class="text-ice font-medium">VP &amp; co-owner</span><span class="block text-muted">80-year prestige-beauty model shop</span></figcaption>
+        </figure>
+        <figure data-reveal style="--d:.08s" class="rounded-lg border border-line bg-card p-6 flex flex-col">
+          <span class="reply-badge reply-badge--interested w-max">Interested</span>
+          <blockquote class="mt-4 font-display text-[19px] leading-[1.4] tracking-[-0.01em] text-ice">"Yes, we are interested in the companies."</blockquote>
+          <figcaption class="mt-auto pt-5 text-[13px] leading-snug"><span class="text-ice font-medium">Managing Director</span><span class="block text-muted">Baymark Partners, a top-ranked LMM fund, off one cold email</span></figcaption>
+        </figure>
+        <figure data-reveal style="--d:.16s" class="rounded-lg border border-line bg-card p-6 flex flex-col">
+          <span class="reply-badge reply-badge--meeting w-max"><span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>Meeting booked</span>
+          <blockquote class="mt-4 font-display text-[19px] leading-[1.4] tracking-[-0.01em] text-ice">"Let's get a call on the calendar."</blockquote>
+          <figcaption class="mt-auto pt-5 text-[13px] leading-snug"><span class="text-ice font-medium">Owner &amp; Producer</span><span class="block text-muted">High-end video production studio, 35 years</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 7 (Selected results) — placed after the client spotlight ===================== -->
+    <section id="results" class="border-y border-line bg-[#0B0D10]">
+      <div class="mx-auto max-w-shell px-5 py-20 md:py-28">
+        <div class="max-w-2xl">
+          <div data-reveal class="accent-bar mb-5"></div>
+          <span data-reveal style="--d:.04s" class="label-mono">Results</span>
+          <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">Selected results.</h2>
+          <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Real outcomes from campaigns we've architected and run end-to-end, across lanes.</p>
+        </div>
+
+        <div class="mt-12 grid md:grid-cols-2 gap-5">
+          <!-- 01 -->
+          <article data-reveal class="group rounded-lg border border-line bg-card p-7 md:p-8 flex flex-col transition-colors duration-200 hover:border-cyan/40">
+            <div class="flex items-center justify-between">
+              <span class="label-mono text-steel">Amazon PPC Agency</span>
+              <span class="font-mono text-[12px] text-muted/70">01 / 04</span>
+            </div>
+            <div class="mt-7 res-stat text-[46px] sm:text-[54px] text-cyan">7&ndash;9<span class="text-[22px] text-muted ml-1.5">figure</span></div>
+            <div class="mt-3 font-display text-[18px] font-semibold text-ice">DTC brands on the calendar</div>
+            <p class="mt-2 text-[14px] leading-[1.7] text-muted flex-1">Landed calls with large-scale ecommerce operators the team had struggled to reach.</p>
+          </article>
+          <!-- 02 -->
+          <article data-reveal style="--d:.07s" class="group rounded-lg border border-line bg-card p-7 md:p-8 flex flex-col transition-colors duration-200 hover:border-cyan/40">
+            <div class="flex items-center justify-between">
+              <span class="label-mono text-steel">Creative / Design Agency</span>
+              <span class="font-mono text-[12px] text-muted/70">02 / 04</span>
+            </div>
+            <div class="mt-7 res-stat text-[46px] sm:text-[54px] text-cyan"><span class="res-num" data-to="30">30</span></div>
+            <div class="mt-3 font-display text-[18px] font-semibold text-ice">calls in 50 days</div>
+            <p class="mt-2 text-[14px] leading-[1.7] text-muted flex-1">Booked with VC funds and VC-backed startups in under two months.</p>
+          </article>
+          <!-- 03 -->
+          <article data-reveal style="--d:.07s" class="group rounded-lg border border-line bg-card p-7 md:p-8 flex flex-col transition-colors duration-200 hover:border-cyan/40">
+            <div class="flex items-center justify-between">
+              <span class="label-mono text-steel">B2B Lead-Gen Agency</span>
+              <span class="font-mono text-[12px] text-muted/70">03 / 04</span>
+            </div>
+            <div class="mt-7 res-stat text-[46px] sm:text-[54px] text-cyan"><span class="res-num" data-to="40" data-suffix="+">40+</span></div>
+            <div class="mt-3 font-display text-[18px] font-semibold text-ice">meetings with 3PL founders</div>
+            <p class="mt-2 text-[14px] leading-[1.7] text-muted flex-1">Across three outbound sequences: 3,668 leads, 7,208 emails, 33 positive replies.</p>
+          </article>
+          <!-- 04 -->
+          <article data-reveal style="--d:.07s" class="group rounded-lg border border-line bg-card p-7 md:p-8 flex flex-col transition-colors duration-200 hover:border-cyan/40">
+            <div class="flex items-center justify-between">
+              <span class="label-mono text-steel">3rd-Party Logistics</span>
+              <span class="font-mono text-[12px] text-muted/70">04 / 04</span>
+            </div>
+            <div class="mt-7 res-stat text-[46px] sm:text-[54px] text-cyan"><span class="res-num" data-to="100" data-prefix="$" data-suffix="k+">$100k+</span></div>
+            <div class="mt-3 font-display text-[18px] font-semibold text-ice">in pipeline revenue</div>
+            <p class="mt-2 text-[14px] leading-[1.7] text-muted flex-1">Booked meetings with ecommerce brands doing 4,000+ orders a month.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCK 8.5 (Pipeline flowchart) ===================== -->
+    <section id="pipeline" class="mx-auto max-w-shell px-5 py-16 md:py-20">
+      <div class="max-w-2xl">
+        <div data-reveal class="accent-bar mb-5"></div>
+        <span data-reveal style="--d:.04s" class="label-mono">The pipeline</span>
+        <h2 data-reveal style="--d:.08s" class="h2-display mt-3 text-[30px] sm:text-[38px] md:text-[44px] text-ice">From idea to booked meeting.</h2>
+        <p data-reveal style="--d:.14s" class="mt-4 text-[16px] leading-[1.7] text-muted">Every prospect moves through the same eight stages. We run all of them, end to end.</p>
+      </div>
+
+      <div data-reveal class="mt-10">
+        <div class="flow-r">
+          <div class="flow-node"><span class="flow-i">01</span><span class="flow-l">Ideation</span></div>
+          <div class="flow-c"><i></i></div>
+          <div class="flow-node"><span class="flow-i">02</span><span class="flow-l">TAM mapping</span></div>
+          <div class="flow-c"><i style="animation-delay:.4s"></i></div>
+          <div class="flow-node"><span class="flow-i">03</span><span class="flow-l">Enrichment</span></div>
+          <div class="flow-c"><i style="animation-delay:.8s"></i></div>
+          <div class="flow-node"><span class="flow-i">04</span><span class="flow-l">Copywriting</span></div>
+        </div>
+        <div class="flow-turn"><span><i></i></span></div>
+        <div class="flow-r flow-r--rev">
+          <div class="flow-node"><span class="flow-i">05</span><span class="flow-l">Launch</span></div>
+          <div class="flow-c"><i style="animation-delay:.2s"></i></div>
+          <div class="flow-node"><span class="flow-i">06</span><span class="flow-l">Reply</span></div>
+          <div class="flow-c"><i style="animation-delay:.6s"></i></div>
+          <div class="flow-node"><span class="flow-i">07</span><span class="flow-l">Qualified</span></div>
+          <div class="flow-c"><i style="animation-delay:1s"></i></div>
+          <div class="flow-node is-goal"><span class="flow-i">08</span><span class="flow-l">Booked</span></div>
         </div>
       </div>
     </section>
@@ -985,10 +1297,10 @@
         <div data-reveal class="rounded-lg border border-line bg-card p-7 md:p-8 flex flex-col">
           <span class="inline-flex w-max items-center rounded-pill border border-line px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">Performance</span>
           <div class="mt-6 flex items-baseline gap-2">
-            <span id="perfPrice" class="font-display text-[42px] font-bold text-ice leading-none">$3,000</span>
+            <span id="perfPrice" class="font-display text-[42px] font-bold text-ice leading-none">$3,250</span>
             <span id="perfFeeLabel" class="text-[13px] text-muted">one-time setup fee</span>
           </div>
-          <div class="mt-3 font-mono text-[15px] text-cyan">+ $200 per call held</div>
+          <div class="mt-3 font-mono text-[15px] text-cyan">+ $250 per call held</div>
           <p class="mt-4 text-[14px] leading-[1.7] text-muted">Only pay for meetings that actually happen — lowest commitment, fully aligned incentives.</p>
           <ul class="mt-6 space-y-3 text-[14px] text-ice/85">
             <li class="flex items-start gap-2.5"><svg class="mt-0.5 shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Full email infrastructure (25+ domains, 50+ mailboxes)</li>
@@ -1004,7 +1316,7 @@
           <span class="absolute -top-3 left-7 inline-flex items-center rounded-pill bg-cyan px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[#07151A] font-semibold">Guaranteed calls</span>
           <span class="inline-flex w-max items-center rounded-pill border border-cyan/40 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-cyan">Trust</span>
           <div class="mt-6 flex items-baseline gap-2">
-            <span id="trustPrice" class="font-display text-[42px] font-bold text-ice leading-none">$8,000</span>
+            <span id="trustPrice" class="font-display text-[42px] font-bold text-ice leading-none">$8,550</span>
             <span id="trustFeeLabel" class="text-[13px] text-muted">one-time 90-day fee</span>
           </div>
           <div id="trustGuarantee" class="mt-3 font-mono text-[15px] text-cyan">20 calls guaranteed</div>
@@ -1226,18 +1538,14 @@
     }
 
     makeRotator('industryRotator', [
-      'Logistics', 'Amazon agencies', 'Commercial services', 'B2B SaaS',
-      'AgTech', 'FinTech', 'Manufacturing', '3PL providers',
-      'HealthTech', 'MedTech', 'Cybersecurity', 'MarTech',
-      'Professional services', 'Consulting firms', 'Staffing & recruiting', 'Managed IT (MSPs)',
-      'Construction', 'Wholesale & distribution', 'Industrial equipment', 'Supply chain',
-      'CleanTech', 'Renewable energy', 'PropTech', 'InsurTech',
-      'EdTech', 'Biotech', 'Enterprise software', 'Data & analytics',
-      'Field services', 'Financial services', 'Telecom', 'Robotics',
-      'Private equity', 'Search funds', 'M&A advisory', 'Family offices',
-      'Commercial production', 'Creative production', 'Video production', 'Branded content',
-      'Specialty manufacturing', 'Building products', 'Industrial services', 'Precision machining',
-      'EHS & compliance', 'Environmental services', 'Facility services', 'Restoration & remediation'
+      'Private equity', 'M&A advisory', 'Financial services', 'Search funds',
+      'Family offices', 'Independent sponsors', 'Investment firms', 'Capital allocators',
+      'Production studios', 'VFX studios', 'Creative agencies', 'Branded content',
+      'Commercial production', 'Video production', 'Amazon agencies', 'DTC brands',
+      'Trades M&A', 'Home-service roll-ups', 'HVAC & plumbing', 'Facility services',
+      'Specialty manufacturing', 'Industrial services', 'EHS & compliance', 'Environmental services',
+      'B2B SaaS', 'Professional services', 'Consulting firms', 'Managed IT (MSPs)',
+      'Logistics & 3PL', 'Wholesale & distribution', 'Manufacturing', 'Commercial services'
     ], 2400);
 
     makeRotator('valueRotator', [
@@ -1263,6 +1571,17 @@
       document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
     })();
 
+    // Count a results metric up from 0 when its panel opens.
+    function countResNum(el) {
+      const to = parseFloat(el.dataset.to);
+      if (!isFinite(to)) return;
+      const dur = 1100, start = performance.now();
+      const pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+      const fmt = (v) => pre + Math.round(v).toLocaleString() + suf;
+      function tick(t) { const p = Math.min((t - start) / dur, 1), e = 1 - Math.pow(1 - p, 3); el.textContent = fmt(to * e); if (p < 1) requestAnimationFrame(tick); }
+      requestAnimationFrame(tick);
+    }
+
     // Accordions (results + FAQ)
     function initAccordion(id, openFirst) {
       const acc = document.getElementById(id);
@@ -1276,6 +1595,7 @@
         body.style.maxHeight = open ? body.scrollHeight + 'px' : '0px';
         if (icon) icon.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
         item.classList.toggle('acc-open', open);
+        if (open) item.querySelectorAll('.res-num').forEach(countResNum);
       }
       items.forEach((item) => {
         item.querySelector('.acc-trigger').addEventListener('click', () => {
@@ -1294,8 +1614,15 @@
         });
       });
     }
-    initAccordion('resultsAccordion', true);
     initAccordion('faqAccordion', false);
+
+    // Results metrics count up when scrolled into view.
+    (function () {
+      const rn = [...document.querySelectorAll('.res-num')];
+      if (!rn.length) return;
+      const io = new IntersectionObserver((es) => { es.forEach((e) => { if (e.isIntersecting) { countResNum(e.target); io.unobserve(e.target); } }); }, { threshold: 0.6 });
+      rn.forEach((el) => { el.textContent = '0'; io.observe(el); });
+    })();
 
     // Voice-note players (Isaac Gross) — generalized to any number of .vn-player blocks
     (function () {
@@ -1373,32 +1700,38 @@
       if (!track) return;
       // Prefers a local asset (assets/logos/<slug>.svg) if present, else Clearbit by domain,
       // else a styled wordmark. Local files always win once dropped in.
+      // Consumer / media brands carry a real logo (Clearbit by domain). PE, M&A and
+      // production firms render as clean Syne wordmarks (no `d`) — more intentional at
+      // marquee scale than a scrappy or mismatched logo, and safer than a wrong-domain hit.
       const BRANDS = [
         { n: 'Clarins', d: 'clarins.com' },
-        { n: 'Utleys', d: 'utleys.com' },
-        { n: 'Pioneer Engineering', d: 'pioneerees.com' },
-        { n: 'ETC Compliance', d: 'e-t-c.com' },
-        { n: 'ITEK Construction', d: 'itekconstruction.com' },
         { n: 'MGM', d: 'mgm.com' },
         { n: 'CD PROJEKT RED', d: 'cdprojektred.com' },
-        { n: 'Feastables', d: 'feastables.com' },
+        { n: 'Baymark Partners' },
         { n: 'AG1', d: 'drinkag1.com' },
+        { n: 'MSouth Equity Partners' },
         { n: 'doTERRA', d: 'doterra.com' },
+        { n: 'Caltius Equity Partners' },
         { n: 'Tommy John', d: 'tommyjohn.com' },
-        { n: "Rothy's", d: 'rothys.com' },
-        { n: 'Faherty', d: 'fahertybrand.com' },
-        { n: 'HUM Nutrition', d: 'humnutrition.com' },
-        { n: 'Tower 28', d: 'tower28beauty.com' },
+        { n: 'Grove Mountain Partners' },
         { n: 'Trends International', d: 'trendsinternational.com' },
+        { n: 'BayHawk Capital' },
         { n: 'Blue Ant Media', d: 'blueantmedia.com' },
-        { n: 'Cliganic', d: 'cliganic.com' },
+        { n: 'Balmoral Partners' },
+        { n: 'Tower 28', d: 'tower28beauty.com' },
+        { n: 'Monument Square' },
         { n: 'Global Icons', d: 'globalicons.com' },
+        { n: 'Sojourner Consumer Partners' },
+        { n: 'Utleys', d: 'utleys.com' },
+        { n: 'Concept One Media' },
       ];
       const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       function wordmark(item, name) { item.innerHTML = ''; const s = document.createElement('span'); s.className = 'logo-word'; s.textContent = name; item.appendChild(s); }
       function make(b) {
         const item = document.createElement('div');
         item.className = 'logo-item';
+        // No domain → render a clean wordmark straight away (PE / M&A / production firms).
+        if (!b.d) { wordmark(item, b.n); return item; }
         const img = document.createElement('img');
         img.alt = b.n; img.loading = 'lazy'; img.decoding = 'async';
         // Prefer a local SVG (assets/logos/<slug>.svg), then Clearbit's real horizontal
@@ -1424,6 +1757,12 @@
 
       // Company -> domain, for the small watermark logo beside each name.
       const DOMAINS = {
+        'Baymark Partners': 'baymarkpartners.com',
+        'Caltius Equity Partners': 'caltius.com',
+        'MSouth Equity Partners': 'msouth.com',
+        'Balmoral Partners': 'balmoralpartners.global',
+        'FortéOne Capital': 'forteone.com',
+        'Ismail / Bisconni': 'bisconni.com',
         'Utleys': 'utleys.com',
         'Pioneer Engineering & Environmental': 'pioneerees.com',
         'ETC Compliance Solutions': 'e-t-c.com',
@@ -1460,24 +1799,36 @@
       wireLogos(document);
 
       if (!grid) return;
-      const SLOTS = 5;
+      const SLOTS = 6;
+      const initial = (name) => { const m = String(name || '').match(/[A-Za-z0-9]/); return m ? m[0].toUpperCase() : '·'; };
       function cardHTML(r) {
         const meeting = r.badge === 'meeting';
-        const domain = DOMAINS[r.company] || '';
         return `
           <div class="mb-3">
             <span class="reply-badge ${meeting ? 'reply-badge--meeting' : 'reply-badge--interested'}">${meeting ? '<span class="h-1.5 w-1.5 rounded-full" style="background:#22D3EE"></span>Meeting booked' : 'Interested'}</span>
           </div>
           <p class="text-[14px] leading-[1.6] text-ice/90 flex-1">${esc(r.snippet)}</p>
           <div class="mt-4 pt-3.5 border-t border-line flex items-center gap-2.5">
-            <img class="wm-logo" alt="" data-domain="${esc(domain)}" />
+            <span class="wm-init" aria-hidden="true">${esc(initial(r.company))}</span>
             <div class="min-w-0">
               <div class="text-[13px] text-ice font-medium leading-tight truncate">${esc(r.role)}</div>
               <div class="mt-0.5 text-[12px] text-muted truncate">${esc(r.company)}</div>
             </div>
           </div>`;
       }
-      function render(card, r) { card.innerHTML = cardHTML(r); wireLogos(card); }
+      // Load the real logo as a monochrome silhouette; on failure fall back to a matching white initial.
+      function wireMark(img) {
+        const domain = img.getAttribute('data-domain');
+        const init = img.getAttribute('data-initial') || '·';
+        const toInit = () => { const s = document.createElement('span'); s.className = 'wm-init'; s.textContent = init; img.replaceWith(s); };
+        if (!domain) { toInit(); return; }
+        const srcs = ['https://logo.clearbit.com/' + domain, 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64'];
+        let stage = 0;
+        img.onerror = function () { stage++; if (stage < srcs.length) { img.src = srcs[stage]; } else { img.onerror = null; toInit(); } };
+        img.src = srcs[0];
+      }
+      function wireMarks(scope) { scope.querySelectorAll('img.wm-mark[data-initial]').forEach(wireMark); }
+      function render(card, r) { card.innerHTML = cardHTML(r); wireMarks(card); }
       function makeCard() {
         const el = document.createElement('article');
         el.className = 'reply-card rounded-lg border border-line bg-card p-5 flex flex-col';
@@ -1496,7 +1847,7 @@
         const n = Math.min(SLOTS, pool.length);
         let queue = shuffled(pool);
         const onScreen = queue.slice(0, n);
-        const cards = onScreen.map((r) => { const c = makeCard(); render(c, r); grid.appendChild(c); return c; });
+        const cards = onScreen.map((r, i) => { const c = makeCard(); render(c, r); c.classList.add('card-in'); c.style.animationDelay = (i * 0.08) + 's'; grid.appendChild(c); return c; });
         let cursor = n;
 
         // Only cycle if we have more items than visible slots.
@@ -1520,7 +1871,7 @@
           }
           schedule();
         }
-        function schedule() { setTimeout(tick, 4000 + Math.random() * 3200); }
+        function schedule() { setTimeout(tick, 2400 + Math.random() * 2800); }
         schedule();
       }
 
@@ -1624,8 +1975,8 @@
     // Pricing 90/45-day toggle
     (function () {
       const data = {
-        '90': { perf: '$3,000', perfFee: 'one-time setup fee', trust: '$8,000', trustFee: 'one-time 90-day fee', guar: '20 calls guaranteed' },
-        '45': { perf: '$1,750', perfFee: 'one-time setup fee', trust: '$4,000', trustFee: 'one-time 45-day fee', guar: '7 calls guaranteed' },
+        '90': { perf: '$3,250', perfFee: 'one-time setup fee', trust: '$8,550', trustFee: 'one-time 90-day fee', guar: '20 calls guaranteed' },
+        '45': { perf: '$1,750', perfFee: 'one-time setup fee', trust: '$4,300', trustFee: 'one-time 45-day fee', guar: '7 calls guaranteed' },
       };
       const b90 = document.getElementById('toggle90'), b45 = document.getElementById('toggle45');
       if (!b90) return;
@@ -1642,6 +1993,138 @@
       }
       b90.addEventListener('click', () => set('90'));
       b45.addEventListener('click', () => set('45'));
+    })();
+
+    // "The stack we run" — flowing B&W tool logos (real operating stack). Clearbit logo, wordmark fallback.
+    (function () {
+      const track = document.getElementById('toolTrack');
+      if (!track) return;
+      const TOOLS = [
+        { n: 'Claude Code', d: 'anthropic.com' },
+        { n: 'Codex', d: 'openai.com' },
+        { n: 'Jina AI', d: 'jina.ai' },
+        { n: 'Exa', d: 'exa.ai' },
+        { n: 'Apollo', d: 'apollo.io' },
+        { n: 'Apify', d: 'apify.com' },
+        { n: 'Supabase', d: 'supabase.com' },
+        { n: 'QuickEnrich' },
+        { n: 'Parallel AI' },
+        { n: 'crawl4ai' },
+        { n: 'Serper' },
+        { n: 'MillionVerifier' },
+        { n: 'BounceBan' },
+        { n: 'ZAI' },
+        { n: 'PlusVibe', d: 'plusvibe.ai' },
+      ];
+      const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      function wordmark(item, name) { item.innerHTML = ''; const s = document.createElement('span'); s.className = 'logo-word'; s.textContent = name; item.appendChild(s); }
+      function make(b) {
+        const item = document.createElement('div'); item.className = 'logo-item';
+        if (!b.d) { wordmark(item, b.n); return item; }
+        const img = document.createElement('img'); img.alt = b.n; img.loading = 'lazy'; img.decoding = 'async';
+        const srcs = ['assets/logos/' + slug(b.n) + '.svg', 'https://logo.clearbit.com/' + b.d];
+        let stage = 0;
+        img.onerror = function () { stage++; if (stage < srcs.length) { img.src = srcs[stage]; } else { wordmark(item, b.n); } };
+        img.src = srcs[0];
+        item.appendChild(img); return item;
+      }
+      const frag = document.createDocumentFragment();
+      [...TOOLS, ...TOOLS].forEach((b) => frag.appendChild(make(b)));
+      track.appendChild(frag);
+    })();
+
+    // Compounding-loop stepper — auto-advance, click a node, pause on hover, only run in view.
+    (function () {
+      const nodes = [...document.querySelectorAll('.loop-node')];
+      const loop = document.getElementById('loop');
+      if (!nodes.length || !loop) return;
+      const STEPS = [
+        { cat: 'Signal mining', title: 'The right moment, found.', desc: 'We track funding rounds, new hires, launches, and compliance triggers, so outreach lands the week it actually matters.' },
+        { cat: 'Data & enrichment', title: 'Your true TAM, verified.', desc: 'Every account enriched across 10+ sources and triple-verified. Sub-1% bounce, zero wasted sends.' },
+        { cat: 'Messaging', title: 'Copy that earns the reply.', desc: 'A differentiated angle per segment, grounded in a real signal, written to read like a peer and not a pitch.' },
+        { cat: 'Launch', title: 'Live, from day one.', desc: 'Sent across purpose-built domains and warmed mailboxes. Your primary domain is never touched, never at risk.' },
+        { cat: 'Meetings booked', title: 'Qualified meetings, on your calendar.', desc: 'We chase, qualify, remind, and recover no-shows end to end. You just show up and close.' },
+        { cat: 'Optimize', title: 'Every cycle compounds.', desc: 'Real reply data drives the next round. Winning angles scale, the dead ones get cut, week over week.' },
+      ];
+      const numEl = document.getElementById('loopNum'), catEl = document.getElementById('loopCat'), titleEl = document.getElementById('loopTitle'), descEl = document.getElementById('loopDesc'), idxEl = document.getElementById('loopIdx');
+      const panel = document.querySelector('.loop-panel');
+      let i = 0, timer = null;
+      const pad = (n) => String(n).padStart(2, '0');
+      function set(n) {
+        i = (n + STEPS.length) % STEPS.length;
+        const s = STEPS[i];
+        nodes.forEach((el) => el.classList.toggle('active', Number(el.dataset.i) === i));
+        if (numEl) numEl.textContent = pad(i + 1);
+        if (catEl) catEl.textContent = s.cat;
+        if (titleEl) titleEl.textContent = s.title;
+        if (descEl) descEl.textContent = s.desc;
+        if (idxEl) idxEl.textContent = (i + 1) + ' / ' + STEPS.length;
+        if (panel) { panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap'); }
+      }
+      function start() { stop(); timer = setInterval(() => set(i + 1), 2600); }
+      function stop() { if (timer) { clearInterval(timer); timer = null; } }
+      nodes.forEach((el) => el.addEventListener('click', () => { set(Number(el.dataset.i)); start(); }));
+      loop.addEventListener('mouseenter', stop);
+      loop.addEventListener('mouseleave', start);
+      set(0);
+      const io = new IntersectionObserver((es) => { es.forEach((e) => { e.isIntersecting ? start() : stop(); }); }, { threshold: 0.25 });
+      io.observe(loop);
+    })();
+
+    // Stat band count-up — numbers roll from 0 to their target when the band scrolls in.
+    (function () {
+      const nums = [...document.querySelectorAll('.stat-num')];
+      if (!nums.length) return;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function fmt(el, v) {
+        const dec = parseInt(el.dataset.decimals || '0', 10);
+        const pre = el.dataset.prefix || '';
+        const suf = el.dataset.suffix || '';
+        return pre + (dec ? v.toFixed(dec) : Math.round(v).toLocaleString()) + suf;
+      }
+      function run(el) {
+        const to = parseFloat(el.dataset.to);
+        if (reduce || !isFinite(to)) { el.textContent = fmt(el, to); return; }
+        const dur = 1900, start = performance.now();
+        el._raf && cancelAnimationFrame(el._raf);
+        function tick(t) {
+          const p = Math.min((t - start) / dur, 1), e = 1 - Math.pow(1 - p, 3.4);
+          el.textContent = fmt(el, to * e);
+          if (p < 1) el._raf = requestAnimationFrame(tick);
+        }
+        el._raf = requestAnimationFrame(tick);
+      }
+      // Replay each time the band scrolls back into view (reset when it leaves).
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            if (!e.target._playing) { e.target._playing = true; run(e.target); }
+          } else {
+            e.target._playing = false;
+            e.target.textContent = fmt(e.target, 0);
+          }
+        });
+      }, { threshold: 0.6 });
+      nums.forEach((el) => { el.textContent = fmt(el, 0); io.observe(el); });
+    })();
+
+    // Draw the ECG heartbeat trace (repeating P-QRS-T beats), wide enough to scroll seamlessly.
+    (function () {
+      const p = document.getElementById('ecgLine');
+      if (!p) return;
+      const w = 150, b = 44, beats = 11;
+      let d = `M0 ${b}`;
+      for (let i = 0; i < beats; i++) {
+        const x = i * w;
+        d += ` L${x + 0.30 * w} ${b}`;                                  // flat
+        d += ` L${x + 0.36 * w} ${b - 6} L${x + 0.42 * w} ${b}`;        // P wave
+        d += ` L${x + 0.48 * w} ${b}`;
+        d += ` L${x + 0.505 * w} ${b + 5} L${x + 0.55 * w} ${b - 30}`;  // Q, R spike
+        d += ` L${x + 0.595 * w} ${b + 13} L${x + 0.63 * w} ${b}`;      // S, back to baseline
+        d += ` L${x + 0.74 * w} ${b - 9} L${x + 0.84 * w} ${b}`;        // T wave
+        d += ` L${x + w} ${b}`;                                          // flat to end
+      }
+      p.setAttribute('d', d);
     })();
   </script>
 </body>
