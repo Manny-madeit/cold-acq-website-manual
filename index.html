@@ -248,8 +248,11 @@
     .hub-dot { animation: pulse 2.4s ease-in-out infinite; }
     .hub-core { animation: hubRing 2.4s ease-out infinite; }
     @keyframes hubRing { 0% { r: 8px; opacity: .7; } 100% { r: 30px; opacity: 0; } }
-    .loop-panel.swap #loopNum, .loop-panel.swap #loopCat, .loop-panel.swap #loopTitle, .loop-panel.swap #loopDesc, .loop-panel.swap #loopIdx { animation: loopFade .42s cubic-bezier(.22,.61,.36,1); }
-    @keyframes loopFade { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+    .loop-panel { overflow: hidden; }
+    .loop-panel.swipe-next #loopNum, .loop-panel.swipe-next #loopCat, .loop-panel.swipe-next #loopTitle, .loop-panel.swipe-next #loopDesc, .loop-panel.swipe-next #loopIdx { animation: swipeNext .4s cubic-bezier(.22,.61,.36,1) both; }
+    .loop-panel.swipe-prev #loopNum, .loop-panel.swipe-prev #loopCat, .loop-panel.swipe-prev #loopTitle, .loop-panel.swipe-prev #loopDesc, .loop-panel.swipe-prev #loopIdx { animation: swipePrev .4s cubic-bezier(.22,.61,.36,1) both; }
+    @keyframes swipeNext { from { opacity: 0; transform: translateX(38px); } to { opacity: 1; transform: none; } }
+    @keyframes swipePrev { from { opacity: 0; transform: translateX(-38px); } to { opacity: 1; transform: none; } }
     @media (max-width: 480px) {
       .loop-node { width: 66px; height: 66px; }
       .loop-node .n { font-size: 15px; }
@@ -2051,7 +2054,9 @@
       let i = 0, timer = null;
       const pad = (n) => String(n).padStart(2, '0');
       function set(n) {
+        const prev = i;
         i = (n + STEPS.length) % STEPS.length;
+        if (i === prev && panel && panel.dataset.init) return; // no-op re-hover of the same node
         const s = STEPS[i];
         nodes.forEach((el) => el.classList.toggle('active', Number(el.dataset.i) === i));
         if (numEl) numEl.textContent = pad(i + 1);
@@ -2059,11 +2064,21 @@
         if (titleEl) titleEl.textContent = s.title;
         if (descEl) descEl.textContent = s.desc;
         if (idxEl) idxEl.textContent = (i + 1) + ' / ' + STEPS.length;
-        if (panel) { panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap'); }
+        if (panel) {
+          const fwd = ((i - prev + STEPS.length) % STEPS.length) <= STEPS.length / 2;
+          panel.classList.remove('swipe-next', 'swipe-prev');
+          void panel.offsetWidth;
+          panel.classList.add(fwd ? 'swipe-next' : 'swipe-prev');
+          panel.dataset.init = '1';
+        }
       }
       function start() { stop(); timer = setInterval(() => set(i + 1), 2600); }
       function stop() { if (timer) { clearInterval(timer); timer = null; } }
-      nodes.forEach((el) => el.addEventListener('click', () => { set(Number(el.dataset.i)); start(); }));
+      nodes.forEach((el) => {
+        const go = () => set(Number(el.dataset.i));
+        el.addEventListener('click', () => { go(); start(); });
+        el.addEventListener('mouseenter', go); // hover a node to swipe straight to it
+      });
       loop.addEventListener('mouseenter', stop);
       loop.addEventListener('mouseleave', start);
       set(0);
